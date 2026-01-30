@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png"> 
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fdfcff">
+    <title>GajiPro v10.1 - Modal Fix</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* --- VARIABLES --- */
+        :root { 
+            --primary: #6750A4; --on-primary: #FFFFFF;
+            --primary-container: #EADDFF; --on-primary-container: #21005D;
+            --secondary: #625B71; --secondary-container: #E8DEF8; --on-secondary-container: #1D192B;
+            --error: #B3261E; --error-container: #F9DEDC; --on-error-container: #410e0b;
+            --bg: #FDFCFF; --surface: #F3F3FA; --surface-variant: #E7E0EC;
+            --outline: #79747E; --text: #1C1B1F; --text-secondary: #49454F;
+            --header-blur: rgba(253, 252, 255, 0.95);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            --nav-height: 80px; --header-height: 64px;
+            --radius-l: 24px; --radius-m: 16px; --radius-pill: 50px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #D0BCFF; --on-primary: #381E72;
+            --primary-container: #4F378B; --on-primary-container: #EADDFF;
+            --secondary: #CCC2DC; --secondary-container: #4A4458; --on-secondary-container: #E8DEF8;
+            --error: #F2B8B5; --error-container: #8C1D18; --on-error-container: #F9DEDC;
+            --bg: #141218; --surface: #1D1B20; --surface-variant: #49454F;
+            --outline: #938F99; --text: #E6E1E5; --text-secondary: #CAC4D0;
+            --header-blur: rgba(20, 18, 24, 0.95);
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; position: fixed; }
+
+        /* --- SPLASH SCREEN (CENTERED) --- */
+        #splash-screen {
+            position: fixed; inset: 0; width: 100vw; height: 100dvh;
+            background: var(--bg); z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.4s ease-out, visibility 0.4s; padding-bottom: 5%;
+        }
+        .splash-content { width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .splash-logo-svg { display: block; margin: 0 auto 16px auto; width: 90px; height: 90px; fill: var(--primary); animation: logoPulse 2s infinite; }
+        .splash-text { display: block; width: 100%; font-size: 2.2rem; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; margin: 0; }
+        .splash-credit { display: block; width: 100%; font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px; font-weight: 500; opacity: 0.8; letter-spacing: 0.5px; }
+        .splash-loader { display: block; width: 140px; height: 4px; background: rgba(0,0,0,0.05); border-radius: 2px; margin: 30px auto 0 auto; position: relative; overflow: hidden; }
+        .splash-loader::after { content: ''; position: absolute; height: 100%; width: 40%; background: var(--primary); animation: loaderMove 1.2s infinite ease-in-out; }
+        @keyframes logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes loaderMove { 0% { left: -40%; } 100% { left: 100%; } }
+
+        /* --- APP STRUCTURE --- */
+        .app-layout { display: flex; flex-direction: column; height: 100%; width: 100%; position: fixed; top: 0; left: 0; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
+        .app-layout.visible { opacity: 1; visibility: visible; }
+
+        .app-header {
+            position: absolute; top: 0; left: 0; right: 0; height: var(--header-height);
+            background: var(--header-blur); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 50;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-svg { width: 32px; height: 32px; fill: var(--primary); filter: drop-shadow(0 2px 4px rgba(103, 80, 164, 0.3)); }
+        .app-logo-text { font-size: 1.4rem; font-weight: 800; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+        .header-action { font-size: 1.2rem; padding: 8px; border-radius: 50%; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
+        
+        .app-scroll-container {
+            flex: 1; position: relative; padding-top: var(--header-height);
+            overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        .view-section { display: none; padding: 20px 20px 40px 20px; min-height: calc(100% + 1px); width: 100%; animation: none; }
+        .view-section.active { display: block; animation: fadeScaleIn 0.3s cubic-bezier(0.2, 0.0, 0.2, 1) forwards; }
+        @keyframes fadeScaleIn { 0% { opacity: 0; transform: scale(0.98) translateY(5px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .view-section::-webkit-scrollbar { width: 0px; }
+
+        /* --- COMPONENTS --- */
+        .card { background: var(--surface); border-radius: var(--radius-l); padding: 24px; margin-bottom: 16px; box-shadow: var(--card-shadow); border: 1px solid rgba(255,255,255,0.5); position: relative; overflow: hidden; transition: 0.3s; }
+        [data-theme="dark"] .card { border: 1px solid rgba(255,255,255,0.05); }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 700; letter-spacing: 0.8px; margin-left: 4px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 16px; border: none; background: var(--surface-variant); border-radius: var(--radius-m); font-size: 1.05rem; font-family: 'Roboto', sans-serif; color: var(--text); transition: 0.2s; border: 2px solid transparent; font-weight: 500; }
+        input:focus, select:focus { outline: none; background: var(--bg); border-color: var(--primary); }
+        .btn { position: relative; overflow: hidden; border: none; border-radius: var(--radius-pill); padding: 0 24px; height: 50px; min-width: 64px; font-family: 'Roboto', sans-serif; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; width: 100%; }
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3); }
+        .btn-secondary { background: var(--secondary-container); color: var(--on-secondary-container); }
+        .btn-danger { background: var(--error); color: white; box-shadow: 0 4px 12px rgba(179, 38, 30, 0.3); }
+        [data-theme="dark"] .btn-danger { background: var(--error-container); color: var(--error); }
+        .btn-text { background: transparent; color: var(--primary); height: auto; padding: 12px; }
+        .btn-outline { background: transparent; border: 1px solid var(--outline); color: var(--primary); }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+        .balance-card { background: var(--primary); color: var(--on-primary); padding: 24px; border-radius: 32px; box-shadow: 0 10px 20px rgba(103, 80, 164, 0.25); margin-bottom: 24px; position: relative; overflow: hidden; transition: 0.3s; }
+        [data-theme="dark"] .balance-card { color: var(--on-primary-container); background: var(--primary-container); }
+        .balance-card.debt-theme { background: var(--error); color: white; box-shadow: 0 10px 20px rgba(179, 38, 30, 0.25); }
+        [data-theme="dark"] .balance-card.debt-theme { background: var(--error-container); color: var(--on-error-container); }
+        .balance-card::after { content: ''; position: absolute; top: -30px; right: -30px; width: 140px; height: 140px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none; }
+        .balance-label { font-size: 0.8rem; opacity: 0.8; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .balance-value { font-size: 2.6rem; font-weight: 800; margin: 4px 0 24px 0; letter-spacing: -1px; }
+        .balance-row { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; background: rgba(0,0,0,0.1); margin: 0 -24px -24px -24px; padding: 16px 0; backdrop-filter: blur(5px); }
+        .balance-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 12px; }
+        .divider-vertical { width: 1px; height: 30px; background: rgba(255,255,255,0.2); }
+        .b-title { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 2px; }
+        .b-val { font-size: 1.1rem; font-weight: 700; }
+
+        .info-pill { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; }
+        .safe { background: #E8F5E9; color: #1b5e20; }
+        .danger { background: var(--error-container); color: var(--error); }
+
+        .log-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 20px; margin-bottom: 12px; background: var(--surface); border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; }
+        .log-left { display: flex; flex-direction: column; justify-content: center; }
+        .log-date { font-weight: 700; font-size: 1rem; color: var(--text); letter-spacing: 0.2px; margin-bottom: 4px; }
+        .log-note { font-size: 0.85rem; color: var(--text-secondary); font-weight: 400; }
+        .log-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+        .log-val { font-weight: 800; font-size: 1.05rem; color: var(--primary); letter-spacing: -0.3px; margin-bottom: 6px; }
+        .log-type { font-size: 0.65rem; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; font-weight: 700; letter-spacing: 0.5px; }
+        
+        .t-kerja { color: #1b5e20; background: #E8F5E9; }
+        .t-kasbon { color: #b3261e; background: #F9DEDC; }
+        .t-hutang { color: #6750A4; background: #EADDFF; }
+        .t-bayar { color: #006C70; background: #C4E7E9; }
+        [data-theme="dark"] .t-kerja { color: #a5d6a7; background: #1b3020; }
+        [data-theme="dark"] .t-kasbon { color: #ef9a9a; background: #411414; }
+        [data-theme="dark"] .t-hutang { color: #d1c4e9; background: #322a45; }
+        [data-theme="dark"] .t-bayar { color: #80deea; background: #1a3539; }
+
+        .bottom-nav { flex-shrink: 0; height: var(--nav-height); background: var(--bg); border-top: 1px solid rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; align-items: center; z-index: 100; padding-bottom: 10px; transition: 0.3s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .nav-icon-container { width: 52px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 16px; margin-bottom: 6px; transition: 0.3s cubic-bezier(0.2, 0.0, 0, 1.0); }
+        .nav-icon { font-size: 1.3rem; }
+        .nav-item.active .nav-icon-container { background: var(--secondary-container); }
+        .nav-item.active { color: var(--text); font-weight: 800; }
+        [data-theme="dark"] .nav-item.active .nav-icon-container { color: var(--on-secondary-container); }
+
+        /* --- MODAL FIX Z-INDEX --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 12000; /* Highest Z-Index to prevent click block */
+            display: none; align-items: center; justify-content: center; 
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); 
+        }
+        .modal-content { background: var(--bg); width: 85%; max-width: 360px; border-radius: 28px; padding: 32px 24px 24px 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalSpring 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: var(--text); text-align: center; }
+        @keyframes modalSpring { 0% { transform: scale(0.7) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; margin-top: 0; }
+        .modal-body { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; text-align: left; }
+        .modal-footer { display: flex; flex-direction: column; gap: 12px; }
+        
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) scale(0.9); background: #1C1B1F; color: #F4EFF4; padding: 14px 24px; border-radius: 50px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 13000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-weight: 500; }
+        [data-theme="dark"] .toast { background: #E6E1E5; color: #313033; }
+        .toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="splash-content">
+            <svg class="splash-logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 6h10c1.1 0 2 .9 2 2v11H7V8H5v13h14V8c0-2.21-1.79-4-4-4H5c-1.1 0-2 .9-2 2v4h2V6zm15 4h-2.5l-2 3h5l-2-3zm-3 5.5L15 19l2 3 2-3-2-3.5z"/>
+                <path opacity="0.3" d="M3 13h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V7H3v2z"/>
+            </svg>
+            <div class="splash-text">GajiPro</div>
+            <div class="splash-credit">Created by Kartiwa</div>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
+
+    <div class="app-layout" id="app-layout">
+        <div class="app-header">
+            <div class="logo-container">
+                <svg class="logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 6h10c1.1 0 2 .9 2 2v11H7V8H5v13h14V8c0-2.21-1.79-4-4-4H5c-1.1 0-2 .9-2 2v4h2V6zm15 4h-2.5l-2 3h5l-2-3zm-3 5.5L15 19l2 3 2-3-2-3.5z"/>
+                    <path opacity="0.3" d="M3 13h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V7H3v2z"/>
+                </svg>
+                <span class="app-logo-text">GajiPro</span>
+            </div>
+            <div class="header-action" onclick="startPDFDownload()">📄</div>
+        </div>
+
+        <div class="app-scroll-container" id="main-container">
+            <div id="view-home" class="view-section active">
+                <div style="height: 10px;"></div>
+                <div class="balance-card">
+                    <span class="balance-label">SISA GAJI BERSIH</span>
+                    <div class="balance-value" id="total-bersih">Rp 0</div>
+                    <div class="balance-row">
+                        <div class="balance-item"><span class="b-title">Upah Kotor</span><span class="b-val" id="txt-upah">0</span></div>
+                        <div class="divider-vertical"></div>
+                        <div class="balance-item"><span class="b-title">Potongan</span><span class="b-val" id="txt-kasbon-home" style="opacity:0.9">0</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px">Simulasi Akhir</span>
+                        <span class="info-pill safe" id="lbl-status">AMAN</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><div style="font-size:0.75rem; color:var(--text-secondary)">Sisa Hutang Luar</div><div style="font-weight:700; color:var(--error)" id="txt-hutang-home">Rp 0</div></div>
+                        <div style="text-align:right"><div style="font-size:0.75rem; color:var(--text-secondary)">Estimasi Sisa Uang</div><div style="font-weight:800; font-size:1.1rem; color:var(--text)" id="txt-sisa-akhir">Rp 0</div></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="input-group"><div class="input-label">TANGGAL</div><input type="date" id="m-date"></div>
+                    <div class="input-group"><div class="input-label">JAM LEMBUR</div><input type="number" id="m-lembur" placeholder="Contoh: 2"></div>
+                    <button class="btn btn-primary ripple-btn" onclick="addManualWork()">TAMBAH KERJA</button>
+                </div>
+            </div>
+
+            <div id="view-loans" class="view-section">
+                <div style="height: 10px;"></div>
+                <div class="balance-card debt-theme">
+                    <span class="balance-label">TOTAL KEWAJIBAN</span>
+                    <div class="balance-value" id="total-kewajiban">Rp 0</div>
+                    <div class="balance-row">
+                        <div class="balance-item"><span class="b-title">Kasbon</span><span class="b-val" id="txt-kasbon-loan">0</span></div>
+                        <div class="divider-vertical"></div>
+                        <div class="balance-item"><span class="b-title">Hutang Luar</span><span class="b-val" id="txt-hutang-loan">0</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="margin-bottom:16px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; font-size:0.8rem">KASBON KANTOR (Potong Gaji)</div>
+                    <button class="btn btn-danger ripple-btn" onclick="openKasbonModal()">POTONG KASBON BARU</button>
+                </div>
+                <div class="card">
+                    <div style="margin-bottom:16px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; font-size:0.8rem">HUTANG PRIBADI / LUAR</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container)" onclick="openHutangModal()">CATAT HUTANG</button>
+                        <button class="btn ripple-btn" style="background:#C4E7E9; color:#001F25" onclick="openBayarModal()">BAYAR HUTANG</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-history" class="view-section">
+                <div style="height: 10px;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 0 4px;">
+                    <h2 style="margin:0; font-size:1.5rem; color:var(--text); font-weight:800;">Riwayat</h2>
+                    <select id="filter-month" onchange="render()" style="width:auto; padding: 0 16px; height:40px; font-weight:600; border-radius:20px; border:1px solid var(--outline); background: var(--bg);"><option value="all">Semua Bulan</option></select>
+                </div>
+                <div id="log-list"></div>
+            </div>
+
+            <div id="view-settings" class="view-section">
+                <div style="height: 10px;"></div>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; color:var(--text-secondary); font-size:0.85rem">TEMA TAMPILAN</span>
+                        <button class="btn ripple-btn" style="width:auto; height:40px; padding:0 20px; background:var(--surface-variant); color:var(--text);" onclick="toggleTheme()" id="btn-theme-toggle">Mode Gelap 🌙</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="input-group"><div class="input-label">GAJI HARIAN (POKOK)</div><input type="text" id="set-upah-tab" oninput="formatInputMoney(this)"></div>
+                    <div class="input-group"><div class="input-label">LEMBUR PER JAM (Jika < 6 Jam)</div><input type="text" id="set-lembur-tab" oninput="formatInputMoney(this)"></div>
+                    <button class="btn btn-primary ripple-btn" onclick="saveSettingsTab()">SIMPAN KONFIGURASI</button>
+                </div>
+                <div class="card">
+                    <div class="input-label" style="margin-bottom:12px">BACKUP & RESTORE</div>
+                    <button class="btn btn-outline ripple-btn" onclick="startExportData()" style="margin-bottom:12px">BACKUP DATA (.JSON)</button>
+                    <div style="border-top:1px solid var(--outline); opacity: 0.2; margin:16px 0;"></div>
+                    <button class="btn btn-secondary ripple-btn" onclick="triggerImport()">RESTORE DARI FILE</button>
+                    <input type="file" id="file-input" style="display:none" onchange="importData(this)">
+                </div>
+                <button class="btn btn-text ripple-btn" onclick="hardReset()" style="color:var(--error); margin-top:10px; width: 100%">Hapus Semua Data App</button>
+                
+                <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; opacity: 0.6;">
+                    <div style="font-size: 0.8rem; font-weight: 500;">Created by Kartiwa</div>
+                    <div style="font-size: 0.7rem;">GajiPro v10.1</div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home')" id="nav-home"><div class="nav-icon-container"><div class="nav-icon">🏠</div></div><div>Beranda</div></div>
+            <div class="nav-item" onclick="switchTab('loans')" id="nav-loans"><div class="nav-icon-container"><div class="nav-icon">💸</div></div><div>Pinjaman</div></div>
+            <div class="nav-item" onclick="switchTab('history')" id="nav-history"><div class="nav-icon-container"><div class="nav-icon">📋</div></div><div>Riwayat</div></div>
+            <div class="nav-item" onclick="switchTab('settings')" id="nav-settings"><div class="nav-icon-container"><div class="nav-icon">⚙️</div></div><div>Akun</div></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Notifikasi</div>
+    
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" class="modal-title">Judul</h3>
+            <div id="modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary ripple-btn" id="modal-confirm">SIMPAN</button>
+                <button class="btn btn-text ripple-btn" onclick="closeModal()" style="color: var(--text-secondary)">BATAL</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- APP STARTUP ---
+    window.onload = function() {
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                document.getElementById('app-layout').classList.add('visible');
+            }, 400);
+        }, 2200);
+    }
+
+    // --- THEME ---
+    function initTheme() {
+        const saved = localStorage.getItem('gp_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+        updateThemeBtn(saved);
+    }
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('gp_theme', next);
+        updateThemeBtn(next);
+    }
+    function updateThemeBtn(theme) {
+        document.getElementById('btn-theme-toggle').innerText = theme === 'dark' ? "Mode Terang ☀️" : "Mode Gelap 🌙";
+    }
+    initTheme();
+
+    // --- RIPPLE ---
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ripple-btn') || e.target.closest('.ripple-btn')) {
+            const btn = e.target.classList.contains('ripple-btn') ? e.target : e.target.closest('.ripple-btn');
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+    });
+
+    let CONFIG = JSON.parse(localStorage.getItem('gp_config')) || { UPAH: 130000, LEMBUR: 15000 };
+    let logs = JSON.parse(localStorage.getItem('gp_v4')) || [];
+
+    // --- TAB ANIMATION LOGIC (FADE & SCALE) ---
+    function switchTab(tab) {
+        const allViews = document.querySelectorAll('.view-section');
+        allViews.forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${tab}`).classList.add('active');
+        document.getElementById(`nav-${tab}`).classList.add('active');
+        if(tab === 'settings') {
+            document.getElementById('set-upah-tab').value = formatMoneySimple(CONFIG.UPAH);
+            document.getElementById('set-lembur-tab').value = formatMoneySimple(CONFIG.LEMBUR);
+        }
+    }
+
+    // --- MAIN APP LOGIC ---
+    function addManualWork() {
+        const d = document.getElementById('m-date').value;
+        const l_input = parseFloat(document.getElementById('m-lembur').value) || 0;
+        if(!d) return showToast("Pilih tanggal dulu!");
+        let lemburPay = 0, note = "", l_fixed = Math.floor(l_input);
+        if (l_input >= 6) { lemburPay = CONFIG.UPAH; note = `Lembur Full (Paket 6 Jam+)`; } 
+        else { lemburPay = l_fixed * CONFIG.LEMBUR; note = `Lembur ${l_fixed} Jam`; }
+        logs.unshift({ id: Date.now(), tgl: new Date(d).toLocaleDateString('id-ID'), type: 'KERJA', val: CONFIG.UPAH + lemburPay, note: note });
+        document.getElementById('m-lembur').value = ''; save(); showToast("Data tersimpan");
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    
+    // --- ROBUST MODAL SYSTEM (FIXED) ---
+    function openModal(title, bodyHtml, onConfirm, btnText = "SIMPAN", btnClass = "btn-primary", hideCancel = false) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        
+        // RECREATE BUTTON TO CLEAR OLD LISTENERS
+        const oldBtn = document.getElementById('modal-confirm');
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        
+        newBtn.innerText = btnText; 
+        newBtn.className = `btn ${btnClass} ripple-btn`; 
+        
+        newBtn.onclick = function() { 
+            try { onConfirm(); } catch(e){ console.log(e); } 
+            closeModal(); 
+        };
+        
+        const cancelBtn = document.querySelector('.modal-footer .btn-text');
+        if(hideCancel) cancelBtn.style.display = 'none'; else cancelBtn.style.display = 'flex';
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function openSuccessModal(msg) {
+        openModal("Berhasil!", `<div class="success-checkmark"><div class="check-icon" style="font-size:2rem">✓</div></div><div style="text-align:center; font-weight:500">${msg}</div>`, () => {}, "TUTUP", "btn-primary", true);
+    }
+
+    function openKasbonModal() { openModal("Potong Kasbon", `<div class="input-group"><div class="input-label">NOMINAL</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'KASBON', val: v, note: 'Bon Kantor' }); save(); showToast("Kasbon dicatat"); } }); }
+    function openHutangModal() { openModal("Catat Hutang Luar", `<div class="input-group"><div class="input-label">NOMINAL</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'HUTANG', val: v, note: 'Hutang Pribadi' }); save(); showToast("Hutang dicatat"); } }); }
+    function openBayarModal() { openModal("Bayar Hutang", `<div class="input-group"><div class="input-label">NOMINAL BAYAR</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'BAYAR_HUTANG', val: v, note: 'Pelunasan' }); save(); showToast("Pembayaran dicatat"); } }); }
+    
+    function editItem(id) {
+        const i = logs.find(x => x.id === id);
+        openModal("Edit Data", `<div class="input-group"><div class="input-label">NOMINAL</div><input type="number" id="e-val" value="${i.val}"></div><div class="input-group"><div class="input-label">KETERANGAN</div><input type="text" id="e-note" value="${i.note}"></div>`, 
+            () => { i.val = parseInt(document.getElementById('e-val').value) || 0; i.note = document.getElementById('e-note').value; save(); showToast("Data diperbarui"); });
+    }
+    function confirmDel(id) { openModal("Hapus Data", "<p>Yakin ingin menghapus data ini? Data yang dihapus tidak dapat dikembalikan.</p>", () => { logs = logs.filter(x => x.id !== id); save(); showToast("Data dihapus"); }, "HAPUS", "btn-danger"); }
+
+    function render() {
+        const filterVal = document.getElementById('filter-month').value;
+        const filteredLogs = filterVal === 'all' ? logs : logs.filter(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}` === filterVal; });
+        const months = [...new Set(logs.map(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}`; }))].sort().reverse();
+        const sel = document.getElementById('filter-month');
+        if(sel.options.length === 1 && months.length > 0) { months.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.text = new Date(m + "-01").toLocaleString('id-ID', { month: 'long', year: 'numeric' }); sel.add(opt); }); }
+
+        let html = "";
+        filteredLogs.forEach(i => {
+            let typeClass = i.type === 'KASBON' ? 't-kasbon' : i.type === 'HUTANG' ? 't-hutang' : i.type === 'BAYAR_HUTANG' ? 't-bayar' : 't-kerja';
+            html += `<div class="log-item" onclick="showOptions(${i.id})"><div class="log-left"><span class="log-date">${i.tgl}</span><span class="log-note">${i.note}</span></div><div class="log-right"><div class="log-val">Rp ${i.val.toLocaleString('id-ID')}</div><span class="log-type ${typeClass}">${i.type.replace('_',' ')}</span></div><div style="margin-left:12px; display:flex; gap:12px; align-items:center;"><div onclick="editItem(${i.id}); event.stopPropagation()" style="color:var(--primary); padding:8px; font-size:1.2rem">✎</div><div onclick="confirmDel(${i.id}); event.stopPropagation()" style="color:var(--error); padding:8px; font-size:1.2rem">✕</div></div></div>`;
+        });
+        document.getElementById('log-list').innerHTML = html || "<div style='text-align:center; padding:60px 20px; color:var(--text-secondary); font-size:0.9rem;'>Belum ada riwayat transaksi.</div>";
+
+        let kotor=0, kasbon=0, hutangIn=0, hutangOut=0;
+        logs.forEach(i => { if(i.type === 'KERJA') kotor += i.val; else if(i.type === 'KASBON') kasbon += i.val; else if(i.type === 'HUTANG') hutangIn += i.val; else if(i.type === 'BAYAR_HUTANG') hutangOut += i.val; });
+        const bersih = kotor - kasbon;
+        document.getElementById('txt-upah').innerText = "Rp " + kotor.toLocaleString('id-ID');
+        document.getElementById('txt-kasbon-home').innerText = "- Rp " + kasbon.toLocaleString('id-ID');
+        document.getElementById('total-bersih').innerText = "Rp " + bersih.toLocaleString('id-ID');
+        document.getElementById('txt-hutang-home').innerText = "Rp " + (hutangIn - hutangOut).toLocaleString('id-ID');
+        document.getElementById('txt-sisa-akhir').innerText = "Rp " + (bersih - (hutangIn - hutangOut)).toLocaleString('id-ID');
+        
+        if(document.getElementById('total-kewajiban')) {
+             document.getElementById('total-kewajiban').innerText = "Rp " + (kasbon + (hutangIn - hutangOut)).toLocaleString('id-ID');
+             document.getElementById('txt-kasbon-loan').innerText = "Rp " + kasbon.toLocaleString('id-ID');
+             document.getElementById('txt-hutang-loan').innerText = "Rp " + (hutangIn - hutangOut).toLocaleString('id-ID');
+        }
+
+        const lbl = document.getElementById('lbl-status');
+        if(sisaAkhir < 0) { lbl.className = 'info-pill danger'; lbl.innerText = "MINUS"; }
+        else { lbl.className = 'info-pill safe'; lbl.innerText = "AMAN"; }
+    }
+
+    async function startPDFDownload() {
+        if (!window.jspdf) return showToast("Library PDF belum siap");
+        const d = new Date();
+        const dateStr = d.getFullYear() + "-" + (d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getDate().toString().padStart(2,'0');
+        const defaultName = "Laporan_GajiPro_" + dateStr + ".pdf";
+        openModal("Simpan PDF", 
+            `<div class="input-group"><div class="input-label">NAMA FILE</div><input type="text" id="pdf-filename" value="${defaultName}" placeholder="Nama file..."></div>
+             <div style="font-size:0.8rem; color:var(--text-secondary); text-align:left; margin-bottom:8px;">Pilih metode simpan:</div>
+             <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container); flex:1" onclick="executeSharePDF()">📤 Bagikan / Kirim</button>
+             </div>
+             <div style="font-size:0.7rem; color:var(--text-secondary);">*Gunakan tombol di atas untuk kirim ke WA/Drive. Gunakan tombol 'Simpan Ke HP' di bawah untuk download biasa.</div>`,
+            () => {
+                let name = document.getElementById('pdf-filename').value.trim();
+                if(!name) name = defaultName; if(!name.toLowerCase().endsWith('.pdf')) name += ".pdf";
+                generatePDF(name); 
+            }, "SIMPAN KE HP", "btn-primary"
+        );
+    }
+
+    async function executeSharePDF() {
+        const name = document.getElementById('pdf-filename').value.trim();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFillColor(103, 80, 164); doc.rect(0, 0, 210, 20, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("LAPORAN GAJIPRO", 14, 13);
+        const tableBody = logs.map(i => [i.tgl, i.type, i.note, "Rp " + i.val.toLocaleString('id-ID')]);
+        doc.autoTable({ startY: 30, head: [['TGL', 'TIPE', 'KET', 'NOMINAL']], body: tableBody, headStyles: { fillColor: [103, 80, 164] } });
+        const blob = doc.output('blob');
+        const file = new File([blob], name, { type: "application/pdf" });
+        if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Laporan GajiPro' }); closeModal(); } catch (e) { generatePDF(name); } } else { showToast("Share tidak didukung, mengunduh manual..."); generatePDF(name); }
+    }
+
+    function generatePDF(filename) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFillColor(103, 80, 164); doc.rect(0, 0, 210, 20, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("LAPORAN GAJIPRO", 14, 13);
+        const tableBody = logs.map(i => [i.tgl, i.type, i.note, "Rp " + i.val.toLocaleString('id-ID')]);
+        doc.autoTable({ startY: 30, head: [['TGL', 'TIPE', 'KET', 'NOMINAL']], body: tableBody, headStyles: { fillColor: [103, 80, 164] } });
+        const blob = doc.output('blob');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => openSuccessModal("Laporan PDF berhasil disimpan!"), 500);
+    }
+
+    function startExportData() {
+        const d = new Date();
+        const dateStr = d.getFullYear() + "" + (d.getMonth()+1).toString().padStart(2,'0') + "" + d.getDate().toString().padStart(2,'0');
+        const defaultName = "Backup_GajiPro_" + dateStr + ".json";
+        openModal("Backup Data", 
+            `<div class="input-group"><div class="input-label">NAMA FILE BACKUP</div><input type="text" id="json-filename" value="${defaultName}" placeholder="Nama file..."></div>
+             <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container); margin-bottom:12px; width:100%" onclick="executeShareJSON()">📤 Bagikan / Kirim ke WA</button>
+             <div style="font-size:0.7rem; color:var(--text-secondary);">Tekan tombol di bawah untuk simpan ke folder Download HP.</div>`, 
+            () => {
+                let name = document.getElementById('json-filename').value.trim();
+                if(!name) name = defaultName; if(!name.toLowerCase().endsWith('.json')) name += ".json";
+                executeExport(name);
+            }, "SIMPAN KE HP", "btn-primary"
+        );
+    }
+
+    async function executeShareJSON() {
+        const name = document.getElementById('json-filename').value.trim();
+        const blob = new Blob([JSON.stringify({logs, config:CONFIG})], {type:"application/json"});
+        const file = new File([blob], name, { type: "application/json" });
+        if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Backup GajiPro' }); closeModal(); } catch (e) { executeExport(name); } } else { showToast("Share tidak didukung, download manual..."); executeExport(name); }
+    }
+
+    function executeExport(filename) {
+        const blob = new Blob([JSON.stringify({logs, config:CONFIG})], {type:"application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => openSuccessModal("Backup Data berhasil disimpan!"), 500);
+    }
+
+    function save() { localStorage.setItem('gp_v4', JSON.stringify(logs)); render(); }
+    function saveConfig() { localStorage.setItem('gp_config', JSON.stringify(CONFIG)); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
+    function formatMoneySimple(num) { return "Rp " + (num ? num.toLocaleString('id-ID') : '0'); }
+    function formatInputMoney(input) { let value = input.value.replace(/\D/g, ''); if(!value) { input.value = ''; return; } input.value = "Rp " + parseInt(value).toLocaleString('id-ID'); }
+    function cleanNum(str) { return parseInt(str.replace(/\D/g, '')) || 0; }
+    function saveSettingsTab() { const u = cleanNum(document.getElementById('set-upah-tab').value); const l = cleanNum(document.getElementById('set-lembur-tab').value); if(u && l) { CONFIG.UPAH = u; CONFIG.LEMBUR = l; saveConfig(); showToast("Disimpan"); render(); } }
+    function triggerImport() { document.getElementById('file-input').click(); }
+    function importData(input) { const r = new FileReader(); r.onload = e => { const d = JSON.parse(e.target.result); logs = d.logs; CONFIG = d.config; saveConfig(); save(); openSuccessModal("Data berhasil dipulihkan!"); }; r.readAsText(input.files[0]); }
+    function hardReset() { openModal("⚠️ Hapus Semua Data?", `<div style="text-align:left;"><p style="margin-bottom:12px;">Yakin ingin menghapus <b>seluruh riwayat</b>?</p><div style="font-size:0.85rem; background:var(--error-container); color:var(--error); padding:16px; border-radius:12px; line-height:1.5;">Tindakan ini bersifat permanen.</div></div>`, () => { logs=[]; save(); showToast("Reset berhasil"); }, "YA, HAPUS PERMANEN", "btn-danger"); }
+
+    render();
+// PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('GajiPro PWA Registered'))
+                .catch(err => console.log('PWA Fail:', err));
+        });
+    }
+</script>
+</body>
+</html>
