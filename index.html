@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#fdfcff">
-    <title>GajiPro v10.5 - Rajdhani UI</title>
+    <title>GajiPro v10.6 - No Refresh</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -62,17 +62,19 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* UNIFIED FONT SETUP */
-        body { 
+        /* --- MAIN BODY & NO REFRESH FIX --- */
+        html, body { 
             height: 100dvh; 
             width: 100%; margin: 0; padding: 0; 
             background: var(--bg); color: var(--text); 
-            font-family: 'Rajdhani', sans-serif; /* Applied Globally */
+            font-family: 'Rajdhani', sans-serif;
             font-weight: 500;
-            overflow: hidden; position: fixed; 
+            overflow: hidden; /* Mencegah scroll pada body utama */
+            position: fixed; /* Mencegah karet banding effect di iOS */
+            overscroll-behavior-y: none; /* MEMATIKAN PULL-TO-REFRESH DI ANDROID */
         }
 
-        /* Bold styles for headers since Rajdhani is thinner */
+        /* Bold styles */
         h1, h2, h3, .balance-value, .splash-text, .app-logo-text, .modal-title, .btn {
             font-family: 'Rajdhani', sans-serif;
             font-weight: 700;
@@ -131,6 +133,7 @@
             overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; 
             -webkit-overflow-scrolling: touch; 
             padding-bottom: 130px; 
+            overscroll-behavior-y: contain; /* Tambahan pengaman untuk scroll container */
         }
 
         .view-section { display: none; padding: 20px 20px 0 20px; width: 100%; }
@@ -269,7 +272,7 @@
                 <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
             </svg>
             <div class="splash-text">GAJIPRO</div>
-            <div class="splash-credit">SYSTEM V10.5 // KARTIWA</div>
+            <div class="splash-credit">SYSTEM V10.6 // KARTIWA</div>
         </div>
     </div>
 
@@ -384,7 +387,7 @@
                 <button class="btn btn-outline ripple-btn animate-card delay-3" onclick="hardReset()" style="color:var(--error); border-color:var(--error); margin-top:10px; width: 100%">FACTORY RESET APP</button>
                 
                 <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; opacity: 0.6;" class="animate-card delay-3">
-                    <div style="font-size: 0.8rem; font-weight: 500;">SYSTEM V10.5 // KARTIWA</div>
+                    <div style="font-size: 0.8rem; font-weight: 500;">SYSTEM V10.6 // KARTIWA</div>
                 </div>
             </div>
         </div> 
