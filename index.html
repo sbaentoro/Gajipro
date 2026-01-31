@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#FFD54F"> <title>GajiPro v12.0 - Fun 3D</title>
+    <meta name="theme-color" content="#FFD54F"> 
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2910/2910795.png">
+
+    <title>GajiPro v13.0 - Secure & Dark</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,13 +26,27 @@
             --danger: #FF8A80;  /* Merah Soft */
             --success: #AED581; /* Hijau Soft */
             --surface: #ffffff;
+            --text-main: #000000;
+            --border-color: #000000;
             
-            --border: 3px solid #000000;
-            --shadow: 4px 4px 0px #000000;
-            --shadow-active: 2px 2px 0px #000000;
+            --border: 3px solid var(--border-color);
+            --shadow: 4px 4px 0px var(--border-color);
+            --shadow-active: 2px 2px 0px var(--border-color);
             
             --header-h: 70px;
             --nav-h: 80px;
+        }
+
+        /* --- DARK MODE VARIABLES --- */
+        body.dark-mode {
+            --bg-color: #121212;
+            --dot-color: #333333;
+            --surface: #1E1E1E;
+            --text-main: #ffffff;
+            --border-color: #000000; /* Tetap hitam biar kontras kartun */
+            --primary: #FFC107; /* Kuning lebih gelap */
+            --success: #7CB342;
+            --danger: #E57373;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,13 +55,14 @@
             height: 100dvh; width: 100%; margin: 0; padding: 0; 
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--dot-color) 2px, transparent 2px);
-            background-size: 20px 20px; /* EFEK TITIK-TITIK */
-            color: #000; 
-            font-family: 'Fredoka', sans-serif; /* Font yang lebih bulat & fun */
+            background-size: 20px 20px;
+            color: var(--text-main); 
+            font-family: 'Fredoka', sans-serif;
             overflow: hidden; 
+            transition: background-color 0.3s;
         }
 
-        /* --- LAYOUT FIXED HEADER & NAV --- */
+        /* --- LAYOUT --- */
         .app-header {
             position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
             background: var(--primary);
@@ -52,52 +72,36 @@
         }
         .logo-text { font-weight: 700; font-size: 1.6rem; letter-spacing: 1px; color: #000; text-transform: uppercase; -webkit-text-stroke: 1px #fff;}
 
-        /* --- INDEPENDENT SCROLL AREA --- */
-        /* Wrapper utama di tengah */
         .content-wrapper {
-            position: fixed;
-            top: var(--header-h);
-            bottom: var(--nav-h);
-            left: 0; right: 0;
-            overflow: hidden; /* Prevent body scroll */
+            position: fixed; top: var(--header-h); bottom: var(--nav-h); left: 0; right: 0; overflow: hidden;
         }
-
-        /* Setiap Tab punya scroll sendiri */
         .view-section { 
-            height: 100%; 
-            width: 100%;
-            overflow-y: auto; /* Scroll terjadi di sini */
-            padding: 20px 20px 100px 20px;
-            display: none; 
-            scroll-behavior: smooth;
+            height: 100%; width: 100%; overflow-y: auto; padding: 20px 20px 100px 20px; display: none; scroll-behavior: smooth;
         }
         .view-section.active { display: block; }
 
-        /* --- FUN 3D COMPONENTS --- */
+        /* --- COMPONENTS --- */
         .card { 
-            background: var(--surface); 
-            border: var(--border);
-            border-radius: 12px; 
-            padding: 20px; margin-bottom: 20px; 
-            box-shadow: var(--shadow);
-            position: relative;
+            background: var(--surface); border: var(--border); border-radius: 12px; 
+            padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); position: relative;
+            color: var(--text-main); transition: background 0.3s;
         }
         
         .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
 
-        /* INPUTS 3D */
         .input-group { margin-bottom: 16px; }
         .input-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; display: block;}
+        
         input, select { 
             width: 100%; padding: 12px; 
-            background: #fff; 
+            background: var(--surface); color: var(--text-main);
             border: var(--border); border-radius: 8px;
             font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 500;
             outline: none; transition: 0.1s;
         }
-        input:focus, select:focus { background: #fffde7; transform: translate(-2px, -2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        /* Focus state fix for dark mode */
+        input:focus, select:focus { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
 
-        /* BUTTONS POP 3D */
         .btn { 
             width: 100%; height: 50px; border: var(--border); border-radius: 10px;
             font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1rem;
@@ -109,67 +113,66 @@
         
         .btn-primary { background: var(--accent); color: #000; }
         .btn-danger { background: var(--danger); color: #000; }
-        .btn-secondary { background: #fff; color: #000; }
+        .btn-secondary { background: var(--surface); color: var(--text-main); }
         .btn-success { background: var(--success); color: #000; }
 
         .btn-sm { height: 36px; font-size: 0.8rem; width: auto; padding: 0 15px; margin: 0; box-shadow: 2px 2px 0 #000;}
         .btn-sm:active { box-shadow: 0 0 0 #000; transform: translate(2px, 2px); }
 
-        /* STATS BOXES */
         .stat-box { 
-            background: var(--primary); 
-            border: var(--border); border-radius: 12px; 
-            padding: 20px; margin-bottom: 20px; 
-            box-shadow: var(--shadow);
-            text-align: center;
+            background: var(--primary); border: var(--border); border-radius: 12px; 
+            padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); text-align: center; color: #000;
         }
         .stat-val-big { font-size: 2.5rem; font-weight: 700; margin: 5px 0 15px 0; letter-spacing: -1px; }
-        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
-        /* LOG LIST STYLE */
+        /* LOG LIST */
         .log-item { 
-            background: #fff; border: var(--border); border-radius: 10px;
-            padding: 15px; margin-bottom: 10px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 2px 2px 0 #000; transition: 0.1s;
+            background: var(--surface); border: var(--border); border-radius: 10px;
+            padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 2px 2px 0 #000; transition: 0.1s; color: var(--text-main);
         }
         .log-item:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
 
-        .tag { padding: 4px 8px; border: 2px solid #000; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-right: 5px;}
+        .tag { padding: 4px 8px; border: 2px solid #000; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-right: 5px; color: #000;}
         .tag-kerja { background: var(--success); }
         .tag-hutang { background: var(--primary); }
         .tag-kasbon { background: var(--danger); }
 
-        /* NAVIGATION BOTTOM */
+        /* NAV */
         .bottom-nav { 
             position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); 
-            background: #fff; border-top: var(--border);
-            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; 
-            z-index: 200;
+            background: var(--surface); border-top: var(--border);
+            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; z-index: 200;
         }
         .nav-item { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             cursor: pointer; transition: 0.2s; border-right: 1px solid #eee;
         }
+        body.dark-mode .nav-item { border-right: 1px solid #333; }
+
         .nav-icon { width: 28px; height: 28px; fill: #ccc; margin-bottom: 4px; stroke: #000; stroke-width: 1px;}
         .nav-label { font-size: 0.75rem; font-weight: 700; color: #999; }
 
         .nav-item.active { background: #fff9c4; }
+        body.dark-mode .nav-item.active { background: #444; } /* Dark Active Nav */
+        
         .nav-item.active .nav-icon { fill: var(--primary); transform: scale(1.1); }
-        .nav-item.active .nav-label { color: #000; }
+        .nav-item.active .nav-label { color: var(--text-main); }
 
-        /* MODAL */
-        .modal-overlay { 
+        /* MODAL & PIN OVERLAY */
+        .modal-overlay, .pin-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
-            z-index: 1000; display: none; align-items: center; justify-content: center; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column;
         }
+        .pin-overlay { z-index: 5000; background: var(--primary); } /* PIN di atas segalanya */
+
         .modal-content { 
-            background: #fff; width: 90%; max-width: 350px; 
+            background: var(--surface); width: 90%; max-width: 350px; color: var(--text-main);
             border: var(--border); border-radius: 16px; 
             padding: 24px; box-shadow: 8px 8px 0 rgba(0,0,0,0.5); 
-            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popUp 0.3s;
         }
         @keyframes popUp { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
@@ -179,13 +182,36 @@
         
         .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        
+        /* PIN INPUT STYLES */
+        .pin-display { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+        .pin-dot { width:20px; height:20px; border:2px solid #000; border-radius:50%; background:rgba(255,255,255,0.5); }
+        .pin-dot.filled { background:#000; }
+        .numpad { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; width:280px; }
+        .num-btn { 
+            height:60px; border-radius:50%; border:2px solid #000; background:#fff; 
+            font-size:1.5rem; font-weight:bold; display:flex; align-items:center; justify-content:center;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2); cursor:pointer;
+        }
+        .num-btn:active { transform:translate(2px,2px); box-shadow:none; }
     </style>
 </head>
 <body>
 
+    <div id="pin-lock" class="pin-overlay">
+        <div style="font-size:3rem; margin-bottom:10px;">🔒</div>
+        <h2 style="margin:0 0 20px 0; color:#000;">MASUKKAN PIN</h2>
+        <div class="pin-display" id="pin-dots">
+            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <div class="numpad" id="numpad">
+            </div>
+        <button onclick="forgotPin()" style="margin-top:30px; background:none; border:none; text-decoration:underline; font-weight:bold; cursor:pointer;">Lupa PIN?</button>
+    </div>
+
     <div class="app-header">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width:36px; height:36px; background:#fff; border:2px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center;">GP</div>
+            <div style="width:36px; height:36px; background:#fff; border:2px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">GP</div>
             <span class="logo-text">GajiPro</span>
         </div>
         <button class="btn-sm btn-secondary" onclick="startPDFDownload()">PDF 🖨️</button>
@@ -250,7 +276,7 @@
 
             <div class="card">
                 <div class="card-title">🏢 KASBON KANTOR</div>
-                <p style="margin:0 0 10px 0; font-size:0.9rem; color:#666;">Potongan langsung dari gaji.</p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem; opacity:0.7;">Potongan langsung dari gaji.</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-weight:bold;">
                     <span>Total Kasbon:</span>
                     <span id="txt-kasbon-loan">Rp 0</span>
@@ -260,7 +286,7 @@
 
             <div class="card">
                 <div class="card-title">🏪 HUTANG WARUNG/LUAR</div>
-                <p style="margin:0 0 10px 0; font-size:0.9rem; color:#666;">Hutang makan/rokok (tidak potong gaji otomatis).</p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem; opacity:0.7;">Hutang makan/rokok (tidak potong gaji).</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-weight:bold;">
                     <span>Total Hutang:</span>
                     <span id="txt-hutang-loan">Rp 0</span>
@@ -275,7 +301,7 @@
         <div id="view-history" class="view-section">
             <h2 style="margin-top:0">🗂️ DATABASE</h2>
             
-            <div class="card" style="padding:15px; background:#eee;">
+            <div class="card" style="padding:15px; background:var(--surface);">
                 <div class="grid-2" style="margin-bottom:10px;">
                     <select id="filter-month" onchange="renderApp()">
                         <option value="all">SEMUA BULAN</option>
@@ -294,12 +320,28 @@
                 </div>
             </div>
 
-            <div id="log-list">
-                </div>
+            <div id="log-list"></div>
         </div>
 
         <div id="view-settings" class="view-section">
             <h2 style="margin-top:0">⚙️ PENGATURAN</h2>
+
+            <div class="card">
+                <div class="card-title">TAMPILAN & KEAMANAN</div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:10px;">
+                    <span>🌙 Mode Gelap</span>
+                    <label class="checkbox-wrapper" style="margin:0;">
+                        <input type="checkbox" id="chk-darkmode" onchange="toggleDarkMode(this)" style="display:none">
+                        <div class="custom-check" style="border-radius:20px; width:40px;">💡</div>
+                    </label>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>🔒 Kunci PIN</span>
+                    <button class="btn-sm btn-primary" id="btn-set-pin" onclick="setupPin()">AKTIFKAN</button>
+                </div>
+            </div>
             
             <div class="card">
                 <div class="card-title">GAJI & LEMBUR</div>
@@ -323,10 +365,11 @@
             </div>
 
             <button class="btn btn-danger" onclick="hardReset()">⚠️ RESET PABRIK (HAPUS SEMUA)</button>
-            <div style="text-align:center; margin-top:20px; font-size:0.8rem; color:#888;">GAJIPRO V12.0 // FUN 3D EDITION</div>
+            <div style="text-align:center; margin-top:20px; font-size:0.8rem; opacity:0.6;">GAJIPRO V13.0 // SECURE EDITION</div>
         </div>
 
     </div> 
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -361,28 +404,131 @@
 
 <script>
     // --- DATABASE & INIT ---
-    let appConfig = JSON.parse(localStorage.getItem('gp_config')) || { UPAH: 130000, LEMBUR: 15000 };
+    let appConfig = JSON.parse(localStorage.getItem('gp_config')) || { UPAH: 130000, LEMBUR: 15000, DARK: false, PIN: null };
     let dbLogs = JSON.parse(localStorage.getItem('gp_v4')) || [];
     let currentSort = 'new'; 
+    let tempPin = "";
 
-    // Pastikan DOM loaded
     window.onload = function() {
         document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
+        
+        // Init Dark Mode
+        if(appConfig.DARK) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('chk-darkmode').checked = true;
+        }
+
+        // Init PIN Lock
+        if(appConfig.PIN) {
+            showPinLock();
+            document.getElementById('btn-set-pin').innerText = "GANTI PIN";
+            document.getElementById('btn-set-pin').className = "btn-sm btn-danger";
+        }
+
         renderApp();
     };
 
-    // --- NAVIGATION WITH INDEPENDENT SCROLL ---
+    // --- PIN LOGIC ---
+    function showPinLock() {
+        document.getElementById('pin-lock').style.display = 'flex';
+        renderNumpad();
+    }
+
+    function renderNumpad() {
+        const pad = document.getElementById('numpad');
+        pad.innerHTML = '';
+        [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(n => {
+            const btn = document.createElement('div');
+            btn.className = 'num-btn';
+            btn.innerText = n;
+            btn.onclick = () => handlePinInput(n);
+            pad.appendChild(btn);
+        });
+        updatePinDots();
+    }
+
+    function handlePinInput(val) {
+        if(val === 'C') { tempPin = ""; }
+        else if(val === 'OK') { validatePin(); }
+        else {
+            if(tempPin.length < 4) tempPin += val;
+            if(tempPin.length === 4) setTimeout(validatePin, 200);
+        }
+        updatePinDots();
+    }
+
+    function updatePinDots() {
+        const dots = document.querySelectorAll('.pin-dot');
+        dots.forEach((d, i) => {
+            if(i < tempPin.length) d.classList.add('filled');
+            else d.classList.remove('filled');
+        });
+    }
+
+    function validatePin() {
+        if(tempPin === appConfig.PIN) {
+            document.getElementById('pin-lock').style.display = 'none';
+            tempPin = "";
+        } else {
+            showToast("❌ PIN SALAH!");
+            tempPin = "";
+            updatePinDots();
+        }
+    }
+
+    function setupPin() {
+        if(appConfig.PIN) {
+            // Hapus PIN
+            openModal("HAPUS PIN", "Yakin ingin menghapus PIN keamanan?", () => {
+                appConfig.PIN = null;
+                saveData();
+                showToast("PIN Dihapus");
+                document.getElementById('btn-set-pin').innerText = "AKTIFKAN";
+                document.getElementById('btn-set-pin').className = "btn-sm btn-primary";
+            });
+        } else {
+            // Buat PIN Baru
+            openModal("BUAT PIN BARU", 
+                `<div class="input-group"><label class="input-label">Masukkan 4 Angka</label><input type="number" id="new-pin-inp" placeholder="1234" maxlength="4"></div>`, 
+                () => {
+                    const p = document.getElementById('new-pin-inp').value;
+                    if(p.length === 4) {
+                        appConfig.PIN = p;
+                        saveData();
+                        showToast("✅ PIN Diaktifkan!");
+                        document.getElementById('btn-set-pin').innerText = "GANTI PIN";
+                        document.getElementById('btn-set-pin').className = "btn-sm btn-danger";
+                    } else {
+                        showToast("Harus 4 angka!");
+                    }
+                }
+            );
+        }
+    }
+
+    function forgotPin() {
+        alert("Jika lupa PIN, satu-satunya cara adalah 'Clear Data' browser atau Install Ulang aplikasi. Data akan hilang demi keamanan.");
+    }
+
+    // --- DARK MODE LOGIC ---
+    function toggleDarkMode(el) {
+        if(el.checked) {
+            document.body.classList.add('dark-mode');
+            appConfig.DARK = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            appConfig.DARK = false;
+        }
+        saveData();
+    }
+
+    // --- NAVIGATION ---
     function switchTab(tabId) {
-        // Hide all views
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        // Deactivate nav items
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        
-        // Show target view
         document.getElementById(`view-${tabId}`).classList.add('active');
         document.getElementById(`nav-${tabId}`).classList.add('active');
         
-        // Load config values if settings
         if(tabId === 'settings') {
             document.getElementById('set-upah-tab').value = formatMoneySimple(appConfig.UPAH);
             document.getElementById('set-lembur-tab').value = formatMoneySimple(appConfig.LEMBUR);
@@ -403,15 +549,13 @@
         
         let pay = 0, note = "";
         
-        // Logic Setengah Hari
         if (outH <= 12.5) { 
             pay = appConfig.UPAH * 0.5; note = "Setengah Hari (Pagi)"; 
         } else if (inH >= 12.5) { 
             pay = appConfig.UPAH * 0.5; note = "Setengah Hari (Siang)"; 
         } else {
             pay = appConfig.UPAH; note = `Full Day (${tIn}-${tOut})`;
-            // Logic Lembur
-            const ot = Math.floor(outH - 16.0); // Standar pulang jam 16:00
+            const ot = Math.floor(outH - 16.0); 
             if (ot > 0) { 
                 pay += ot * appConfig.LEMBUR; 
                 note += ` + Lembur ${ot} Jam`; 
@@ -426,25 +570,21 @@
             note: note 
         });
         
-        saveData(); 
-        showToast("✅ Absensi Tersimpan!");
+        saveData(); showToast("✅ Absensi Tersimpan!");
     }
 
-    // --- MODAL FUNCTIONS ---
+    // --- MODAL & INPUTS ---
     function openModal(title, html, callback) {
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-body').innerHTML = html;
         const btn = document.getElementById('modal-confirm');
-        // Reset button clone to remove listeners
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
-        
         newBtn.onclick = () => { callback(); closeModal(); };
         document.getElementById('modal').style.display = 'flex';
     }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-    // --- INPUT FORMS ---
     function openKasbonModal() {
         openModal("AMBIL KASBON", 
             `<div class="input-group"><label class="input-label">Jumlah Kasbon</label><input type="number" id="inp-val" placeholder="Rp 0"></div>`,
@@ -484,9 +624,7 @@
             const cat = document.getElementById('inp-cat').value;
             
             if(val > 0 || isUnknown) {
-                dbLogs.unshift({ 
-                    id: Date.now(), tgl: getDateStr(), type: 'HUTANG', val: val, note: cat, isPending: isUnknown 
-                });
+                dbLogs.unshift({ id: Date.now(), tgl: getDateStr(), type: 'HUTANG', val: val, note: cat, isPending: isUnknown });
                 saveData(); showToast("Hutang tercatat");
             }
         });
@@ -495,7 +633,7 @@
     function toggleDebtInput(cb) {
         const inp = document.getElementById('inp-val');
         if(cb.checked) { inp.value = 0; inp.disabled = true; inp.style.background = '#eee'; } 
-        else { inp.disabled = false; inp.style.background = '#fff'; }
+        else { inp.disabled = false; inp.style.background = 'var(--surface)'; }
     }
 
     function openBayarModal() {
@@ -511,7 +649,6 @@
         );
     }
 
-    // --- ACTIONS: DELETE & EDIT ---
     function confirmDel(id) {
         openModal("HAPUS DATA?", "Yakin ingin menghapus data ini selamanya?", () => {
             dbLogs = dbLogs.filter(x => x.id !== id);
@@ -522,10 +659,8 @@
     function editItem(id) {
         const item = dbLogs.find(x => x.id === id);
         if(!item) return;
-        
         let htmlVal = `<div class="input-group"><label class="input-label">Nominal</label><input type="number" id="e-val" value="${item.val}"></div>`;
         if(item.isPending) htmlVal = `<div class="input-group"><label class="input-label">Harga Sudah Tau?</label><input type="number" id="e-val" placeholder="Masukkan harga..."></div>`;
-
         const html = `${htmlVal}<div class="input-group"><label class="input-label">Catatan</label><input type="text" id="e-note" value="${item.note}"></div>`;
         
         openModal("EDIT DATA", html, () => {
@@ -537,52 +672,46 @@
         });
     }
 
-    // --- RENDER ENGINE ---
+    // --- RENDER ---
     function setSort(type) { currentSort = type; renderApp(); }
 
     function renderApp() {
-        // 1. Filter Logic
         const fMonth = document.getElementById('filter-month').value;
         const fType = document.getElementById('filter-type').value;
 
         let filtered = fMonth === 'all' ? dbLogs : dbLogs.filter(l => {
             const [d, m, y] = l.tgl.split('/'); return `${y}-${m}` === fMonth;
         });
-
         if(fType !== 'all') filtered = filtered.filter(l => l.type === fType);
 
-        // 2. Sort Logic
         if(currentSort === 'new') filtered.sort((a,b) => b.id - a.id);
         else if(currentSort === 'high') filtered.sort((a,b) => b.val - a.val);
         else if(currentSort === 'low') filtered.sort((a,b) => a.val - b.val);
 
-        // 3. Render Dropdown Bulan (Dynamic)
         const months = [...new Set(dbLogs.map(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}`; }))].sort().reverse();
         const sel = document.getElementById('filter-month');
         if(sel.options.length === 1 && months.length > 0) { 
             months.forEach(m => {
                 const opt = document.createElement('option'); opt.value = m;
-                // Nama bulan bahasa indonesia
                 const dateObj = new Date(m + "-01");
                 opt.text = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
                 sel.add(opt);
             });
         }
 
-        // 4. Render Log List HTML
         let html = "";
         filtered.forEach(item => {
             let tagClass = item.type === 'KERJA' ? 'tag-kerja' : (item.type === 'KASBON' ? 'tag-kasbon' : 'tag-hutang');
             if(item.type === 'BAYAR_HUTANG') tagClass = 'tag-kerja';
 
-            let priceDisplay = item.isPending ? `<span style="color:red; font-weight:bold; animation:blink 1s infinite">HARGA ??</span>` : `Rp ${item.val.toLocaleString('id-ID')}`;
+            let priceDisplay = item.isPending ? `<span style="color:var(--danger); font-weight:bold; animation:blink 1s infinite">HARGA ??</span>` : `Rp ${item.val.toLocaleString('id-ID')}`;
             
             html += `
             <div class="log-item" onclick="editItem(${item.id})">
                 <div style="flex:1">
                     <div style="font-size:0.9rem; margin-bottom:4px;">
                         <span class="tag ${tagClass}">${item.type}</span> 
-                        <span style="color:#666; font-size:0.8rem">${item.tgl}</span>
+                        <span style="opacity:0.6; font-size:0.8rem">${item.tgl}</span>
                     </div>
                     <div style="font-weight:700;">${item.note}</div>
                 </div>
@@ -592,9 +721,8 @@
                 </div>
             </div>`;
         });
-        document.getElementById('log-list').innerHTML = html || `<div style="text-align:center; padding:30px; color:#aaa; font-style:italic;">Belum ada data...</div>`;
+        document.getElementById('log-list').innerHTML = html || `<div style="text-align:center; padding:30px; opacity:0.5; font-style:italic;">Belum ada data...</div>`;
 
-        // 5. Calculate Totals (Global, not filtered)
         let totalKotor = 0, totalKasbon = 0, hutangIn = 0, hutangOut = 0;
         dbLogs.forEach(i => {
             if(i.type === 'KERJA') totalKotor += i.val;
@@ -607,18 +735,15 @@
         const bersih = totalKotor - totalKasbon;
         const sisaAkhir = bersih - sisaHutang;
 
-        // Update UI
         setText('txt-upah', formatMoney(totalKotor));
         setText('txt-kasbon-home', "- " + formatMoney(totalKasbon));
         setText('total-bersih', formatMoney(bersih));
         setText('txt-hutang-home', formatMoney(sisaHutang));
         setText('txt-sisa-akhir', formatMoney(sisaAkhir));
-        
         setText('total-kewajiban', formatMoney(totalKasbon + sisaHutang));
         setText('txt-kasbon-loan', formatMoney(totalKasbon));
         setText('txt-hutang-loan', formatMoney(sisaHutang));
 
-        // Status Label
         const lbl = document.getElementById('lbl-status');
         if(sisaAkhir < 0) { lbl.innerText = "DEFISIT"; lbl.style.background = "var(--danger)"; }
         else { lbl.innerText = "AMAN"; lbl.style.background = "var(--success)"; }
@@ -637,15 +762,10 @@
         setTimeout(() => t.classList.remove('show'), 2000);
     }
     
-    function setText(id, val) { 
-        const el = document.getElementById(id); 
-        if(el) el.innerText = val; 
-    }
-    
+    function setText(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; }
     function formatMoney(n) { return "Rp " + n.toLocaleString('id-ID'); }
     function getDateStr() { return new Date().toLocaleDateString('id-ID'); }
     function formatMoneySimple(num) { return "Rp " + (num ? num.toLocaleString('id-ID') : '0'); }
-    
     function formatInputMoney(el) {
         let val = el.value.replace(/\D/g, '');
         if(!val) { el.value = ''; return; }
@@ -659,7 +779,6 @@
         saveData(); showToast("Pengaturan Disimpan");
     }
 
-    // --- FILE OPS ---
     function startExportData() {
         const blob = new Blob([JSON.stringify({logs: dbLogs, config: appConfig})], {type:"application/json"});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); 
@@ -683,37 +802,30 @@
     }
 
     function hardReset() {
-        openModal("RESET TOTAL", "Hapus semua data? Tidak bisa dikembalikan.", () => {
+        openModal("RESET TOTAL", "Hapus semua data & PIN? Aplikasi akan kembali seperti baru.", () => {
             dbLogs = [];
-            saveData(); showToast("Semua data dihapus.");
+            appConfig = { UPAH: 130000, LEMBUR: 15000, DARK: false, PIN: null };
+            saveData(); 
+            location.reload(); // Reload agar reset bersih
         });
     }
 
     async function startPDFDownload() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
         doc.setFontSize(18); doc.text("LAPORAN GAJIPRO", 14, 20);
         doc.setFontSize(10); doc.text("Dicetak: " + getDateStr(), 14, 26);
-        
-        const body = dbLogs.map(i => [
-            i.tgl, 
-            i.type, 
-            i.note, 
-            i.isPending ? "TBA" : "Rp " + i.val.toLocaleString('id-ID')
-        ]);
-        
-        doc.autoTable({
-            startY: 30,
-            head: [['TANGGAL', 'TIPE', 'CATATAN', 'NOMINAL']],
-            body: body,
-            theme: 'grid',
-            headStyles: { fillColor: [255, 213, 79], textColor: [0,0,0] }
-        });
-        
+        const body = dbLogs.map(i => [ i.tgl, i.type, i.note, i.isPending ? "TBA" : "Rp " + i.val.toLocaleString('id-ID') ]);
+        doc.autoTable({ startY: 30, head: [['TANGGAL', 'TIPE', 'CATATAN', 'NOMINAL']], body: body, theme: 'grid', headStyles: { fillColor: [255, 213, 79], textColor: [0,0,0] } });
         doc.save(`Laporan_GajiPro.pdf`);
     }
 
+    // --- PWA REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Registered')).catch(err => console.log('SW Fail', err));
+        });
+    }
 </script>
 </body>
 </html>
