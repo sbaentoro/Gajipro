@@ -3,724 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png"> 
-
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#fdfcff">
-    <title>GajiPro v10.6 - No Refresh</title>
+    <meta name="theme-color" content="#FFD54F"> <title>GajiPro v12.0 - Fun 3D</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* --- VARIABLES --- */
         :root { 
-            --primary: #6750A4; --on-primary: #FFFFFF;
-            --primary-container: #EADDFF; --on-primary-container: #21005D;
-            --secondary: #625B71; --secondary-container: #E8DEF8; --on-secondary-container: #1D192B;
-            --error: #B3261E; --error-container: #F9DEDC; --on-error-container: #410e0b;
+            --bg-color: #f4f4f0;
+            --dot-color: #d0d0d0;
             
-            --bg: #FDFCFF; 
-            --surface: rgba(245, 245, 250, 0.75); 
-            --surface-variant: #E7E0EC;
+            --primary: #FFD54F; /* Kuning Pop */
+            --accent: #4FC3F7;  /* Biru Langit */
+            --danger: #FF8A80;  /* Merah Soft */
+            --success: #AED581; /* Hijau Soft */
+            --surface: #ffffff;
             
-            --outline: #79747E; --text: #1C1B1F; --text-secondary: #49454F;
-            --header-blur: rgba(253, 252, 255, 0.6);
-            --glass: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.6);
+            --border: 3px solid #000000;
+            --shadow: 4px 4px 0px #000000;
+            --shadow-active: 2px 2px 0px #000000;
             
-            --card-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            --float-shadow: 0 10px 40px rgba(103, 80, 164, 0.15);
-            
-            --nav-height: 80px; --header-height: 70px;
-            --radius-l: 24px; --radius-m: 16px; --radius-pill: 50px;
-        }
-
-        [data-theme="dark"] {
-            --primary: #D0BCFF; --on-primary: #381E72;
-            --primary-container: #4F378B; --on-primary-container: #EADDFF;
-            --secondary: #CCC2DC; --secondary-container: #4A4458; --on-secondary-container: #E8DEF8;
-            --error: #F2B8B5; --error-container: #8C1D18; --on-error-container: #F9DEDC;
-            
-            --bg: #050508; 
-            --surface: rgba(20, 20, 30, 0.7);
-            --surface-variant: #252530;
-            
-            --outline: #938F99; --text: #E6E1E5; --text-secondary: #CAC4D0;
-            --header-blur: rgba(5, 5, 8, 0.6);
-            --glass: rgba(20, 20, 30, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            
-            --card-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            --float-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            --header-h: 70px;
+            --nav-h: 80px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* --- MAIN BODY & NO REFRESH FIX --- */
-        html, body { 
-            height: 100dvh; 
-            width: 100%; margin: 0; padding: 0; 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 500;
-            overflow: hidden; /* Mencegah scroll pada body utama */
-            position: fixed; /* Mencegah karet banding effect di iOS */
-            overscroll-behavior-y: none; /* MEMATIKAN PULL-TO-REFRESH DI ANDROID */
+        body { 
+            height: 100dvh; width: 100%; margin: 0; padding: 0; 
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 2px, transparent 2px);
+            background-size: 20px 20px; /* EFEK TITIK-TITIK */
+            color: #000; 
+            font-family: 'Fredoka', sans-serif; /* Font yang lebih bulat & fun */
+            overflow: hidden; 
         }
 
-        /* Bold styles */
-        h1, h2, h3, .balance-value, .splash-text, .app-logo-text, .modal-title, .btn {
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        /* --- BACKGROUND ANIMATION --- */
-        .ambient-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden; pointer-events: none;
-        }
-        .blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(90px); opacity: 0.4;
-            animation: floatBlob 25s infinite alternate ease-in-out;
-        }
-        .blob-1 { top: -10%; right: -20%; width: 500px; height: 500px; background: var(--primary); animation-delay: 0s; }
-        .blob-2 { bottom: -10%; left: -20%; width: 400px; height: 400px; background: var(--secondary); animation-delay: -10s; }
-        [data-theme="dark"] .blob { opacity: 0.2; }
-        @keyframes floatBlob {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 50px) scale(1.1); }
-        }
-
-        /* --- SPLASH SCREEN --- */
-        #splash-screen {
-            position: fixed; inset: 0; width: 100vw; height: 100dvh;
-            background: var(--bg); z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.4s ease-out, visibility 0.4s; padding-bottom: 5%;
-        }
-        .splash-content { width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .splash-logo-svg { display: block; margin: 0 auto 16px auto; width: 90px; height: 90px; fill: var(--primary); animation: logoPulse 2s infinite; }
-        .splash-text { font-size: 2.5rem; font-weight: 700; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 2px; }
-        .splash-credit { font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; opacity: 0.8; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
-        @keyframes logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); filter: drop-shadow(0 0 15px var(--primary)); } }
-
-        /* --- APP STRUCTURE --- */
-        .app-layout { display: flex; flex-direction: column; height: 100dvh; width: 100%; position: fixed; top: 0; left: 0; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
-        .app-layout.visible { opacity: 1; visibility: visible; }
-
+        /* --- LAYOUT FIXED HEADER & NAV --- */
         .app-header {
-            position: absolute; top: 0; left: 0; right: 0; height: var(--header-height);
-            background: var(--header-blur); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 50;
-            border-bottom: 1px solid var(--glass-border);
+            position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+            background: var(--primary);
+            border-bottom: var(--border);
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; z-index: 100;
         }
-        .logo-container { display: flex; align-items: center; gap: 12px; }
-        .logo-svg { width: 28px; height: 28px; fill: var(--primary); }
-        .app-logo-text { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; color: var(--text); text-transform: uppercase; }
-        .header-action { font-size: 1.2rem; padding: 10px; border-radius: 12px; background: var(--surface-variant); color: var(--text); cursor: pointer; transition: 0.2s; border: 1px solid var(--glass-border); }
-        
-        /* --- SCROLL CONTAINER --- */
-        .app-scroll-container {
-            flex: 1; position: relative; padding-top: var(--header-height);
-            overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; 
-            -webkit-overflow-scrolling: touch; 
-            padding-bottom: 130px; 
-            overscroll-behavior-y: contain; /* Tambahan pengaman untuk scroll container */
+        .logo-text { font-weight: 700; font-size: 1.6rem; letter-spacing: 1px; color: #000; text-transform: uppercase; -webkit-text-stroke: 1px #fff;}
+
+        /* --- INDEPENDENT SCROLL AREA --- */
+        /* Wrapper utama di tengah */
+        .content-wrapper {
+            position: fixed;
+            top: var(--header-h);
+            bottom: var(--nav-h);
+            left: 0; right: 0;
+            overflow: hidden; /* Prevent body scroll */
         }
 
-        .view-section { display: none; padding: 20px 20px 0 20px; width: 100%; }
+        /* Setiap Tab punya scroll sendiri */
+        .view-section { 
+            height: 100%; 
+            width: 100%;
+            overflow-y: auto; /* Scroll terjadi di sini */
+            padding: 20px 20px 100px 20px;
+            display: none; 
+            scroll-behavior: smooth;
+        }
         .view-section.active { display: block; }
 
-        /* --- ANIMATIONS --- */
-        .animate-card { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        
-        @keyframes slideUpFade { 
-            0% { opacity: 0; transform: translateY(30px) scale(0.98); } 
-            100% { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-
-        /* --- CARD STYLES --- */
+        /* --- FUN 3D COMPONENTS --- */
         .card { 
             background: var(--surface); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-radius: var(--radius-l); padding: 24px; margin-bottom: 16px; 
-            box-shadow: var(--card-shadow); 
-            border: 1px solid var(--glass-border);
-            position: relative; overflow: hidden; transition: 0.3s; 
+            border: var(--border);
+            border-radius: 12px; 
+            padding: 20px; margin-bottom: 20px; 
+            box-shadow: var(--shadow);
+            position: relative;
         }
-        [data-theme="dark"] .card { border: 1px solid rgba(255,255,255,0.08); }
-
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 700; letter-spacing: 1px; margin-left: 4px; text-transform: uppercase; }
         
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+
+        /* INPUTS 3D */
+        .input-group { margin-bottom: 16px; }
+        .input-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; display: block;}
         input, select { 
-            width: 100%; padding: 16px; border: none; background: var(--surface-variant); 
-            border-radius: var(--radius-m); font-size: 1.15rem; font-family: 'Rajdhani', sans-serif; font-weight: 600;
-            color: var(--text); transition: 0.2s; border: 1px solid transparent; 
+            width: 100%; padding: 12px; 
+            background: #fff; 
+            border: var(--border); border-radius: 8px;
+            font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 500;
+            outline: none; transition: 0.1s;
         }
-        input:focus { outline: none; background: var(--bg); border-color: var(--primary); box-shadow: 0 0 15px rgba(103, 80, 164, 0.2); }
+        input:focus, select:focus { background: #fffde7; transform: translate(-2px, -2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
 
-        .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        /* BUTTONS */
-        .btn { position: relative; overflow: hidden; border: none; border-radius: var(--radius-pill); padding: 0 24px; height: 52px; min-width: 64px; font-weight: 700; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 1rem; width: 100%; text-transform: uppercase; }
-        .btn:active { transform: scale(0.96); }
-        .btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: 0 4px 15px rgba(103, 80, 164, 0.4); }
-        .btn-secondary { background: var(--secondary-container); color: var(--on-secondary-container); }
-        .btn-danger { background: var(--error); color: white; box-shadow: 0 4px 15px rgba(179, 38, 30, 0.4); }
-        .btn-outline { background: transparent; border: 1px solid var(--outline); color: var(--primary); }
-        .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; }
-        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
-
-        /* DASHBOARD METRICS */
-        .balance-card { background: var(--primary); color: var(--on-primary); padding: 24px; border-radius: 32px; box-shadow: 0 10px 30px rgba(103, 80, 164, 0.3); margin-bottom: 24px; position: relative; overflow: hidden; }
-        [data-theme="dark"] .balance-card { background: linear-gradient(135deg, var(--primary-container), #2a2045); color: var(--on-primary-container); border: 1px solid rgba(255,255,255,0.1); }
-        .balance-card.debt-theme { background: var(--error); box-shadow: 0 10px 30px rgba(179, 38, 30, 0.3); }
-        [data-theme="dark"] .balance-card.debt-theme { background: linear-gradient(135deg, var(--error-container), #411414); color: var(--on-error-container); }
+        /* BUTTONS POP 3D */
+        .btn { 
+            width: 100%; height: 50px; border: var(--border); border-radius: 10px;
+            font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); transform: translate(0, 0); transition: 0.1s;
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .btn:active { box-shadow: var(--shadow-active); transform: translate(2px, 2px); }
         
-        .balance-label { font-size: 0.85rem; opacity: 0.9; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-        .balance-value { font-size: 3rem; font-weight: 700; margin: 4px 0 24px 0; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .balance-row { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; background: rgba(0,0,0,0.15); margin: 0 -24px -24px -24px; padding: 18px 0; backdrop-filter: blur(5px); }
-        .balance-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 12px; }
-        .divider-vertical { width: 1px; height: 30px; background: rgba(255,255,255,0.2); }
-        .b-title { font-size: 0.75rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; font-weight: 600; margin-bottom: 2px; }
-        .b-val { font-size: 1.3rem; font-weight: 700; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-danger { background: var(--danger); color: #000; }
+        .btn-secondary { background: #fff; color: #000; }
+        .btn-success { background: var(--success); color: #000; }
 
-        .info-pill { display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; }
-        .safe { background: rgba(27, 94, 32, 0.2); color: #2e7d32; border: 1px solid #2e7d32; }
-        [data-theme="dark"] .safe { color: #81c784; border-color: #81c784; }
-        .danger { background: rgba(179, 38, 30, 0.2); color: var(--error); border: 1px solid var(--error); }
+        .btn-sm { height: 36px; font-size: 0.8rem; width: auto; padding: 0 15px; margin: 0; box-shadow: 2px 2px 0 #000;}
+        .btn-sm:active { box-shadow: 0 0 0 #000; transform: translate(2px, 2px); }
 
-        .log-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 20px; margin-bottom: 12px; background: var(--surface); border-radius: 16px; border: 1px solid var(--glass-border); transition: 0.2s; animation: slideUpFade 0.5s backwards; }
-        .log-left { display: flex; flex-direction: column; justify-content: center; }
-        .log-date { font-weight: 700; font-size: 1.15rem; color: var(--text); letter-spacing: 0.5px; margin-bottom: 4px; }
-        .log-note { font-size: 0.95rem; color: var(--text-secondary); font-weight: 500; }
-        .log-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-        .log-val { font-weight: 700; font-size: 1.25rem; color: var(--primary); letter-spacing: 0.5px; margin-bottom: 6px; }
-        .log-type { font-size: 0.75rem; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: 700; letter-spacing: 1px; }
+        /* STATS BOXES */
+        .stat-box { 
+            background: var(--primary); 
+            border: var(--border); border-radius: 12px; 
+            padding: 20px; margin-bottom: 20px; 
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .stat-val-big { font-size: 2.5rem; font-weight: 700; margin: 5px 0 15px 0; letter-spacing: -1px; }
         
-        .t-kerja { color: #1b5e20; background: rgba(27, 94, 32, 0.15); }
-        .t-kasbon { color: #b3261e; background: rgba(179, 38, 30, 0.15); }
-        [data-theme="dark"] .t-kerja { color: #a5d6a7; background: rgba(165, 214, 167, 0.1); }
-        [data-theme="dark"] .t-kasbon { color: #ef9a9a; background: rgba(239, 154, 154, 0.1); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* LOG LIST STYLE */
+        .log-item { 
+            background: #fff; border: var(--border); border-radius: 10px;
+            padding: 15px; margin-bottom: 10px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 2px 2px 0 #000; transition: 0.1s;
+        }
+        .log-item:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
 
-        /* --- FLOATING NAV --- */
+        .tag { padding: 4px 8px; border: 2px solid #000; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-right: 5px;}
+        .tag-kerja { background: var(--success); }
+        .tag-hutang { background: var(--primary); }
+        .tag-kasbon { background: var(--danger); }
+
+        /* NAVIGATION BOTTOM */
         .bottom-nav { 
-            position: fixed; bottom: 24px; left: 24px; right: 24px; 
-            height: 76px; 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-radius: 24px;
-            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; align-items: center; 
-            z-index: 100; 
-            box-shadow: var(--float-shadow);
-            border: 1px solid rgba(255,255,255,0.5);
-            animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            transform: translateY(150px);
+            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); 
+            background: #fff; border-top: var(--border);
+            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; 
+            z-index: 200;
         }
-        [data-theme="dark"] .bottom-nav { background: rgba(20, 20, 30, 0.85); border-color: rgba(255,255,255,0.1); }
-        @keyframes floatUp { 0% { transform: translateY(150px); } 100% { transform: translateY(0); } }
-
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.3s; position: relative; letter-spacing: 0.5px; }
-        
-        .nav-icon { width: 24px; height: 24px; fill: var(--text-secondary); transition: 0.3s; margin-bottom: 4px; }
-        
-        /* Active State with Glow */
-        .nav-item.active { color: var(--primary); font-weight: 700; }
-        .nav-item.active .nav-icon { fill: var(--primary); filter: drop-shadow(0 0 8px var(--primary)); transform: translateY(-3px); }
-        .nav-item.active::after {
-            content: ''; position: absolute; bottom: 8px; width: 4px; height: 4px; background: var(--primary);
-            border-radius: 50%; box-shadow: 0 0 8px var(--primary);
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.2s; border-right: 1px solid #eee;
         }
+        .nav-icon { width: 28px; height: 28px; fill: #ccc; margin-bottom: 4px; stroke: #000; stroke-width: 1px;}
+        .nav-label { font-size: 0.75rem; font-weight: 700; color: #999; }
 
-        /* --- MODAL --- */
+        .nav-item.active { background: #fff9c4; }
+        .nav-item.active .nav-icon { fill: var(--primary); transform: scale(1.1); }
+        .nav-item.active .nav-label { color: #000; }
+
+        /* MODAL */
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); 
-            z-index: 12000; display: none; align-items: center; justify-content: center; 
-            backdrop-filter: blur(10px); 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; 
         }
-        .modal-content { background: var(--bg); width: 85%; max-width: 360px; border-radius: 24px; padding: 32px 24px 24px 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: modalSpring 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: var(--text); text-align: center; border: 1px solid var(--glass-border); }
-        
-        .toast { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%) scale(0.9); background: #1C1B1F; color: #F4EFF4; padding: 14px 24px; border-radius: 8px; font-size: 1rem; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 13000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-weight: 600; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2); }
-        [data-theme="dark"] .toast { background: #E6E1E5; color: #313033; }
-        .toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
+        .modal-content { 
+            background: #fff; width: 90%; max-width: 350px; 
+            border: var(--border); border-radius: 16px; 
+            padding: 24px; box-shadow: 8px 8px 0 rgba(0,0,0,0.5); 
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popUp { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 5px; cursor: pointer; }
+        .custom-check { width: 24px; height: 24px; border: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; background: #fff; }
+        input[type="checkbox"]:checked + .custom-check { background: var(--primary); }
+        
+        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(10px); }
     </style>
 </head>
 <body>
 
-    <div class="ambient-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
+    <div class="app-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width:36px; height:36px; background:#fff; border:2px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center;">GP</div>
+            <span class="logo-text">GajiPro</span>
+        </div>
+        <button class="btn-sm btn-secondary" onclick="startPDFDownload()">PDF 🖨️</button>
     </div>
 
-    <div id="splash-screen">
-        <div class="splash-content">
-            <svg class="splash-logo-svg" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
-            </svg>
-            <div class="splash-text">GAJIPRO</div>
-            <div class="splash-credit">SYSTEM V10.6 // KARTIWA</div>
+    <div class="content-wrapper">
+        
+        <div id="view-home" class="view-section active">
+            <div class="stat-box">
+                <div>SISA BERSIH (NET)</div>
+                <div class="stat-val-big" id="total-bersih">Rp 0</div>
+                <div class="grid-2">
+                    <div style="background:rgba(255,255,255,0.3); padding:8px; border-radius:8px; border:2px solid #000">
+                        <small>PENDAPATAN</small><br><b id="txt-upah">0</b>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.3); padding:8px; border-radius:8px; border:2px solid #000">
+                        <small>POTONGAN</small><br><b id="txt-kasbon-home" style="color:#d32f2f">0</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <span>STATUS KEUANGAN</span>
+                    <span id="lbl-status" style="font-size:0.8rem; background:#000; color:#fff; padding:2px 8px; border-radius:4px;">AMAN</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span>Hutang Luar/Warung:</span>
+                    <b style="color:var(--danger)" id="txt-hutang-home">Rp 0</b>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-top:2px dashed #ccc; padding-top:8px;">
+                    <span>Estimasi Akhir:</span>
+                    <b style="font-size:1.2rem;" id="txt-sisa-akhir">Rp 0</b>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📝 INPUT ABSENSI</div>
+                <div class="input-group">
+                    <label class="input-label">TANGGAL</label>
+                    <input type="date" id="m-date">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label class="input-label">MASUK</label>
+                        <input type="time" id="m-in" value="08:00">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">PULANG</label>
+                        <input type="time" id="m-out" value="16:00">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addManualWork()">✅ MASUK KERJA</button>
+            </div>
+        </div>
+
+        <div id="view-loans" class="view-section">
+            <div class="stat-box" style="background:var(--danger);">
+                <div style="color:#fff">TOTAL KEWAJIBAN</div>
+                <div class="stat-val-big" style="color:#fff" id="total-kewajiban">Rp 0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏢 KASBON KANTOR</div>
+                <p style="margin:0 0 10px 0; font-size:0.9rem; color:#666;">Potongan langsung dari gaji.</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-weight:bold;">
+                    <span>Total Kasbon:</span>
+                    <span id="txt-kasbon-loan">Rp 0</span>
+                </div>
+                <button class="btn btn-secondary" style="border-color:var(--danger); color:var(--danger)" onclick="openKasbonModal()">💸 AMBIL KASBON</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏪 HUTANG WARUNG/LUAR</div>
+                <p style="margin:0 0 10px 0; font-size:0.9rem; color:#666;">Hutang makan/rokok (tidak potong gaji otomatis).</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-weight:bold;">
+                    <span>Total Hutang:</span>
+                    <span id="txt-hutang-loan">Rp 0</span>
+                </div>
+                <div class="grid-2">
+                    <button class="btn btn-primary" onclick="openHutangModal()">➕ CATAT</button>
+                    <button class="btn btn-success" onclick="openBayarModal()">💰 BAYAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-history" class="view-section">
+            <h2 style="margin-top:0">🗂️ DATABASE</h2>
+            
+            <div class="card" style="padding:15px; background:#eee;">
+                <div class="grid-2" style="margin-bottom:10px;">
+                    <select id="filter-month" onchange="renderApp()">
+                        <option value="all">SEMUA BULAN</option>
+                    </select>
+                    <select id="filter-type" onchange="renderApp()">
+                        <option value="all">SEMUA TIPE</option>
+                        <option value="KERJA">KERJA</option>
+                        <option value="HUTANG">HUTANG</option>
+                        <option value="KASBON">KASBON</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-sm btn-secondary" onclick="setSort('new')">BARU</button>
+                    <button class="btn-sm btn-secondary" onclick="setSort('high')">TERBESAR</button>
+                    <button class="btn-sm btn-secondary" onclick="setSort('low')">TERKECIL</button>
+                </div>
+            </div>
+
+            <div id="log-list">
+                </div>
+        </div>
+
+        <div id="view-settings" class="view-section">
+            <h2 style="margin-top:0">⚙️ PENGATURAN</h2>
+            
+            <div class="card">
+                <div class="card-title">GAJI & LEMBUR</div>
+                <div class="input-group">
+                    <label class="input-label">GAJI POKOK (PER HARI)</label>
+                    <input type="text" id="set-upah-tab" oninput="formatInputMoney(this)">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">RATE LEMBUR (PER JAM)</label>
+                    <input type="text" id="set-lembur-tab" oninput="formatInputMoney(this)">
+                </div>
+                <button class="btn btn-primary" onclick="saveSettingsTab()">💾 SIMPAN CONFIG</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">BACKUP / RESTORE</div>
+                <button class="btn btn-secondary" onclick="startExportData()">⬇️ DOWNLOAD DATA (.JSON)</button>
+                <div style="height:10px;"></div>
+                <button class="btn btn-secondary" onclick="triggerImport()">⬆️ RESTORE DATA</button>
+                <input type="file" id="file-input" style="display:none" onchange="importData(this)">
+            </div>
+
+            <button class="btn btn-danger" onclick="hardReset()">⚠️ RESET PABRIK (HAPUS SEMUA)</button>
+            <div style="text-align:center; margin-top:20px; font-size:0.8rem; color:#888;">GAJIPRO V12.0 // FUN 3D EDITION</div>
+        </div>
+
+    </div> 
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span class="nav-label">HOME</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('loans')" id="nav-loans">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+            <span class="nav-label">KEUANGAN</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('history')" id="nav-history">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <span class="nav-label">DATABASE</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('settings')" id="nav-settings">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span class="nav-label">SETTING</span>
         </div>
     </div>
 
-    <div class="app-layout" id="app-layout">
-        <div class="app-header">
-            <div class="logo-container">
-                <svg class="logo-svg" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
-                </svg>
-                <span class="app-logo-text">GAJIPRO</span>
-            </div>
-            <div class="header-action" onclick="startPDFDownload()">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                </svg>
-            </div>
-        </div>
-
-        <div class="app-scroll-container" id="main-container">
-            <div id="view-home" class="view-section active">
-                <div style="height: 10px;"></div>
-                <div class="balance-card animate-card">
-                    <span class="balance-label">SISA GAJI BERSIH</span>
-                    <div class="balance-value" id="total-bersih">Rp 0</div>
-                    <div class="balance-row">
-                        <div class="balance-item"><span class="b-title">Kotor</span><span class="b-val" id="txt-upah">0</span></div>
-                        <div class="divider-vertical"></div>
-                        <div class="balance-item"><span class="b-title">Potongan</span><span class="b-val" id="txt-kasbon-home" style="opacity:0.9">0</span></div>
-                    </div>
-                </div>
-                
-                <div class="card animate-card delay-1">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Simulasi Akhir</span>
-                        <span class="info-pill safe" id="lbl-status">AMAN</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><div style="font-size:0.8rem; color:var(--text-secondary)">Hutang Luar</div><div style="font-weight:700; color:var(--error); font-size:1.1rem" id="txt-hutang-home">Rp 0</div></div>
-                        <div style="text-align:right"><div style="font-size:0.8rem; color:var(--text-secondary)">Estimasi Sisa</div><div style="font-weight:700; font-size:1.4rem; color:var(--text);" id="txt-sisa-akhir">Rp 0</div></div>
-                    </div>
-                </div>
-
-                <div class="card animate-card delay-2">
-                    <div class="input-group"><div class="input-label">TANGGAL INPUT</div><input type="date" id="m-date"></div>
-                    <div class="time-grid">
-                        <div class="input-group">
-                            <div class="input-label">JAM MASUK</div>
-                            <input type="time" id="m-in" value="08:00">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label">JAM PULANG</div>
-                            <input type="time" id="m-out" value="16:00">
-                        </div>
-                    </div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:16px; font-style:italic;">*Sistem otomatis mendeteksi Setengah Hari & Lembur</div>
-                    <button class="btn btn-primary ripple-btn" onclick="addManualWork()">INPUT KEHADIRAN</button>
-                </div>
-            </div>
-
-            <div id="view-loans" class="view-section">
-                <div style="height: 10px;"></div>
-                <div class="balance-card debt-theme animate-card">
-                    <span class="balance-label">TOTAL KEWAJIBAN</span>
-                    <div class="balance-value" id="total-kewajiban">Rp 0</div>
-                    <div class="balance-row">
-                        <div class="balance-item"><span class="b-title">Kasbon</span><span class="b-val" id="txt-kasbon-loan">0</span></div>
-                        <div class="divider-vertical"></div>
-                        <div class="balance-item"><span class="b-title">Hutang Luar</span><span class="b-val" id="txt-hutang-loan">0</span></div>
-                    </div>
-                </div>
-                <div class="card animate-card delay-1">
-                    <div style="margin-bottom:16px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; font-size:0.9rem;">KASBON KANTOR</div>
-                    <button class="btn btn-danger ripple-btn" onclick="openKasbonModal()">POTONG KASBON BARU</button>
-                </div>
-                <div class="card animate-card delay-2">
-                    <div style="margin-bottom:16px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; font-size:0.9rem;">HUTANG EXTERNAL</div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container)" onclick="openHutangModal()">CATAT HUTANG</button>
-                        <button class="btn ripple-btn" style="background:rgba(0, 108, 112, 0.2); color:#006C70; border:1px solid #006C70;" onclick="openBayarModal()">BAYAR HUTANG</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-history" class="view-section">
-                <div style="height: 10px;"></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 0 4px;" class="animate-card">
-                    <h2 style="margin:0; font-size:1.6rem; color:var(--text); font-weight:700;">DATA LOG</h2>
-                    <select id="filter-month" onchange="render()" style="width:auto; padding: 0 16px; height:40px; font-weight:600; border-radius:12px; border:1px solid var(--outline); background: var(--bg); font-family: 'Rajdhani', sans-serif;"><option value="all">SEMUA BULAN</option></select>
-                </div>
-                <div id="log-list"></div>
-            </div>
-
-            <div id="view-settings" class="view-section">
-                <div style="height: 10px;"></div>
-                <div class="card animate-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:var(--text-secondary); font-size:0.9rem;">INTERFACE MODE</span>
-                        <button class="btn ripple-btn" style="width:auto; height:40px; padding:0 20px; background:var(--surface-variant); color:var(--text);" onclick="toggleTheme()" id="btn-theme-toggle">DARK MODE</button>
-                    </div>
-                </div>
-                <div class="card animate-card delay-1">
-                    <div class="input-group"><div class="input-label">GAJI POKOK (PER HARI)</div><input type="text" id="set-upah-tab" oninput="formatInputMoney(this)"></div>
-                    <div class="input-group"><div class="input-label">RATE LEMBUR (PER JAM)</div><input type="text" id="set-lembur-tab" oninput="formatInputMoney(this)"></div>
-                    <button class="btn btn-primary ripple-btn" onclick="saveSettingsTab()">SAVE CONFIG</button>
-                </div>
-                <div class="card animate-card delay-2">
-                    <div class="input-label" style="margin-bottom:12px">DATA MANAGEMENT</div>
-                    <button class="btn btn-outline ripple-btn" onclick="startExportData()" style="margin-bottom:12px">BACKUP DATA (.JSON)</button>
-                    <button class="btn btn-secondary ripple-btn" onclick="triggerImport()">RESTORE DATA</button>
-                    <input type="file" id="file-input" style="display:none" onchange="importData(this)">
-                </div>
-                <button class="btn btn-outline ripple-btn animate-card delay-3" onclick="hardReset()" style="color:var(--error); border-color:var(--error); margin-top:10px; width: 100%">FACTORY RESET APP</button>
-                
-                <div style="text-align: center; margin-top: 30px; margin-bottom: 20px; opacity: 0.6;" class="animate-card delay-3">
-                    <div style="font-size: 0.8rem; font-weight: 500;">SYSTEM V10.6 // KARTIWA</div>
-                </div>
-            </div>
-        </div> 
-
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                </svg>
-                <div>DASHBOARD</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('loans')" id="nav-loans">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                </svg>
-                <div>FINANCE</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('history')" id="nav-history">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                </svg>
-                <div>LOGS</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('settings')" id="nav-settings">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
-                </svg>
-                <div>SYSTEM</div>
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin-top:0; border-bottom:2px solid #000; padding-bottom:10px;">JUDUL</h3>
+            <div id="modal-body"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-secondary" onclick="closeModal()">BATAL</button>
+                <button class="btn btn-primary" id="modal-confirm">OKE</button>
             </div>
         </div>
     </div>
 
     <div id="toast" class="toast">Notifikasi</div>
-    
-    <div id="modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modal-title" class="modal-title">Judul</h3>
-            <div id="modal-body" class="modal-body"></div>
-            <div class="modal-footer">
-                <button class="btn btn-primary ripple-btn" id="modal-confirm">CONFIRM</button>
-                <button class="btn btn-outline ripple-btn" onclick="closeModal()" style="border:none; color: var(--text-secondary)">CANCEL</button>
-            </div>
-        </div>
-    </div>
 
 <script>
-    // --- APP STARTUP ---
+    // --- DATABASE & INIT ---
+    let appConfig = JSON.parse(localStorage.getItem('gp_config')) || { UPAH: 130000, LEMBUR: 15000 };
+    let dbLogs = JSON.parse(localStorage.getItem('gp_v4')) || [];
+    let currentSort = 'new'; 
+
+    // Pastikan DOM loaded
     window.onload = function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('m-date').value = today;
+        document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
+        renderApp();
+    };
 
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-                document.getElementById('app-layout').classList.add('visible');
-            }, 400);
-        }, 1500);
-    }
-
-    // --- THEME ---
-    function initTheme() {
-        const saved = localStorage.getItem('gp_theme') || 'light';
-        document.documentElement.setAttribute('data-theme', saved);
-        updateThemeBtn(saved);
-    }
-    function toggleTheme() {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('gp_theme', next);
-        updateThemeBtn(next);
-    }
-    function updateThemeBtn(theme) {
-        document.getElementById('btn-theme-toggle').innerText = theme === 'dark' ? "LIGHT MODE" : "DARK MODE";
-    }
-    initTheme();
-
-    // --- RIPPLE ---
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('ripple-btn') || e.target.closest('.ripple-btn')) {
-            const btn = e.target.classList.contains('ripple-btn') ? e.target : e.target.closest('.ripple-btn');
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
-            const rect = btn.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
-            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
-            btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
-    });
-
-    let CONFIG = JSON.parse(localStorage.getItem('gp_config')) || { UPAH: 130000, LEMBUR: 15000 };
-    let logs = JSON.parse(localStorage.getItem('gp_v4')) || [];
-
-    // --- TAB ANIMATION LOGIC ---
-    function switchTab(tab) {
-        const allViews = document.querySelectorAll('.view-section');
-        allViews.forEach(el => {
-            el.classList.remove('active');
-        });
+    // --- NAVIGATION WITH INDEPENDENT SCROLL ---
+    function switchTab(tabId) {
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        // Deactivate nav items
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(`view-${tab}`).classList.add('active');
-        document.getElementById(`nav-${tab}`).classList.add('active');
         
-        const animatedCards = document.getElementById(`view-${tab}`).querySelectorAll('.animate-card');
-        animatedCards.forEach(card => {
-            card.style.animation = 'none';
-            card.offsetHeight; 
-            card.style.animation = null; 
-        });
-
-        if(tab === 'settings') {
-            document.getElementById('set-upah-tab').value = formatMoneySimple(CONFIG.UPAH);
-            document.getElementById('set-lembur-tab').value = formatMoneySimple(CONFIG.LEMBUR);
+        // Show target view
+        document.getElementById(`view-${tabId}`).classList.add('active');
+        document.getElementById(`nav-${tabId}`).classList.add('active');
+        
+        // Load config values if settings
+        if(tabId === 'settings') {
+            document.getElementById('set-upah-tab').value = formatMoneySimple(appConfig.UPAH);
+            document.getElementById('set-lembur-tab').value = formatMoneySimple(appConfig.LEMBUR);
         }
-        
-        document.getElementById('main-container').scrollTop = 0;
     }
 
-    // --- MAIN APP LOGIC ---
+    // --- CORE LOGIC ---
     function addManualWork() {
         const d = document.getElementById('m-date').value;
-        const timeIn = document.getElementById('m-in').value; 
-        const timeOut = document.getElementById('m-out').value; 
+        const tIn = document.getElementById('m-in').value; 
+        const tOut = document.getElementById('m-out').value; 
 
-        if(!d || !timeIn || !timeOut) return showToast("INPUT INCOMPLETE");
+        if(!d || !tIn || !tOut) return showToast("⚠️ Data belum lengkap!");
 
-        const getHour = (t) => {
-            const [h, m] = t.split(':').map(Number);
-            return h + (m/60);
-        };
-
-        const inH = getHour(timeIn);
-        const outH = getHour(timeOut);
+        const getHour = (t) => { const [h, m] = t.split(':').map(Number); return h + (m/60); };
+        const inH = getHour(tIn);
+        const outH = getHour(tOut);
         
-        let pay = 0;
-        let note = "";
-
-        const halfDayThreshold = 12.5; // 12:30
+        let pay = 0, note = "";
         
-        if (outH <= halfDayThreshold) {
-            pay = CONFIG.UPAH * 0.5;
-            note = `HALF DAY (MORNING)`;
-        } else if (inH >= halfDayThreshold) {
-            pay = CONFIG.UPAH * 0.5;
-            note = `HALF DAY (AFTERNOON)`;
+        // Logic Setengah Hari
+        if (outH <= 12.5) { 
+            pay = appConfig.UPAH * 0.5; note = "Setengah Hari (Pagi)"; 
+        } else if (inH >= 12.5) { 
+            pay = appConfig.UPAH * 0.5; note = "Setengah Hari (Siang)"; 
         } else {
-            pay = CONFIG.UPAH;
-            note = `FULL DAY (${timeIn}-${timeOut})`;
-
-            const standardEnd = 16.0;
-            if (outH > standardEnd) {
-                const otHours = Math.floor(outH - standardEnd);
-                if (otHours > 0) {
-                    const otPay = otHours * CONFIG.LEMBUR;
-                    pay += otPay;
-                    note += ` + OT ${otHours} JAM`;
-                }
+            pay = appConfig.UPAH; note = `Full Day (${tIn}-${tOut})`;
+            // Logic Lembur
+            const ot = Math.floor(outH - 16.0); // Standar pulang jam 16:00
+            if (ot > 0) { 
+                pay += ot * appConfig.LEMBUR; 
+                note += ` + Lembur ${ot} Jam`; 
             }
         }
 
-        logs.unshift({ 
+        dbLogs.unshift({ 
             id: Date.now(), 
             tgl: new Date(d).toLocaleDateString('id-ID'), 
             type: 'KERJA', 
             val: pay, 
             note: note 
         });
-
-        save(); 
-        showToast("DATA SAVED");
+        
+        saveData(); 
+        showToast("✅ Absensi Tersimpan!");
     }
 
-    function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    
-    // --- MODAL SYSTEM ---
-    function openModal(title, bodyHtml, onConfirm, btnText = "CONFIRM", btnClass = "btn-primary", hideCancel = false) {
+    // --- MODAL FUNCTIONS ---
+    function openModal(title, html, callback) {
         document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-body').innerHTML = bodyHtml;
-        const oldBtn = document.getElementById('modal-confirm');
-        const newBtn = oldBtn.cloneNode(true);
-        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-        newBtn.innerText = btnText; 
-        newBtn.className = `btn ${btnClass} ripple-btn`; 
-        newBtn.onclick = function() { try { onConfirm(); } catch(e){ console.log(e); } closeModal(); };
-        const cancelBtn = document.querySelector('.modal-footer .btn-outline');
-        if(hideCancel) cancelBtn.style.display = 'none'; else cancelBtn.style.display = 'flex';
+        document.getElementById('modal-body').innerHTML = html;
+        const btn = document.getElementById('modal-confirm');
+        // Reset button clone to remove listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.onclick = () => { callback(); closeModal(); };
         document.getElementById('modal').style.display = 'flex';
     }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-    function openSuccessModal(msg) {
-        openModal("SUCCESS", `<div class="success-checkmark"><div class="check-icon" style="font-size:2rem">✓</div></div><div style="text-align:center; font-weight:500">${msg}</div>`, () => {}, "CLOSE", "btn-primary", true);
+    // --- INPUT FORMS ---
+    function openKasbonModal() {
+        openModal("AMBIL KASBON", 
+            `<div class="input-group"><label class="input-label">Jumlah Kasbon</label><input type="number" id="inp-val" placeholder="Rp 0"></div>`,
+            () => {
+                const val = parseInt(document.getElementById('inp-val').value);
+                if(val) {
+                    dbLogs.unshift({ id: Date.now(), tgl: getDateStr(), type: 'KASBON', val: val, note: 'Kasbon Kantor' });
+                    saveData(); showToast("Kasbon tercatat");
+                }
+            }
+        );
     }
 
-    function openKasbonModal() { openModal("INPUT KASBON", `<div class="input-group"><div class="input-label">AMOUNT</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'KASBON', val: v, note: 'OFFICE LOAN' }); save(); showToast("SAVED"); } }); }
-    function openHutangModal() { openModal("EXTERNAL DEBT", `<div class="input-group"><div class="input-label">AMOUNT</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'HUTANG', val: v, note: 'PERSONAL DEBT' }); save(); showToast("SAVED"); } }); }
-    function openBayarModal() { openModal("PAY DEBT", `<div class="input-group"><div class="input-label">PAYMENT AMOUNT</div><input type="number" id="e-val" placeholder="0"></div>`, () => { const v = parseInt(document.getElementById('e-val').value); if(v) { logs.unshift({ id: Date.now(), tgl: new Date().toLocaleDateString('id-ID'), type: 'BAYAR_HUTANG', val: v, note: 'DEBT PAYMENT' }); save(); showToast("SAVED"); } }); }
-    
-    function editItem(id) {
-        const i = logs.find(x => x.id === id);
-        openModal("EDIT DATA", `<div class="input-group"><div class="input-label">AMOUNT</div><input type="number" id="e-val" value="${i.val}"></div><div class="input-group"><div class="input-label">NOTE</div><input type="text" id="e-note" value="${i.note}"></div>`, 
-            () => { i.val = parseInt(document.getElementById('e-val').value) || 0; i.note = document.getElementById('e-note').value; save(); showToast("UPDATED"); });
-    }
-    function confirmDel(id) { openModal("DELETE DATA", "<p>Are you sure? This action cannot be undone.</p>", () => { logs = logs.filter(x => x.id !== id); save(); showToast("DELETED"); }, "DELETE", "btn-danger"); }
-
-    function render() {
-        const filterVal = document.getElementById('filter-month').value;
-        const filteredLogs = filterVal === 'all' ? logs : logs.filter(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}` === filterVal; });
-        const months = [...new Set(logs.map(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}`; }))].sort().reverse();
-        const sel = document.getElementById('filter-month');
-        if(sel.options.length === 1 && months.length > 0) { months.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.text = new Date(m + "-01").toLocaleString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase(); sel.add(opt); }); }
-
-        let html = "";
-        filteredLogs.forEach((i, idx) => {
-            let typeClass = i.type === 'KASBON' ? 't-kasbon' : i.type === 'HUTANG' ? 't-hutang' : i.type === 'BAYAR_HUTANG' ? 't-bayar' : 't-kerja';
-            let delayStyle = `animation-delay: ${idx * 0.05}s`;
-            html += `<div class="log-item" style="${delayStyle}" onclick="showOptions(${i.id})"><div class="log-left"><span class="log-date">${i.tgl}</span><span class="log-note">${i.note}</span></div><div class="log-right"><div class="log-val">Rp ${i.val.toLocaleString('id-ID')}</div><span class="log-type ${typeClass}">${i.type.replace('_',' ')}</span></div><div style="margin-left:12px; display:flex; gap:12px; align-items:center;"><div onclick="editItem(${i.id}); event.stopPropagation()" style="color:var(--primary); padding:8px; font-size:1.2rem">✎</div><div onclick="confirmDel(${i.id}); event.stopPropagation()" style="color:var(--error); padding:8px; font-size:1.2rem">✕</div></div></div>`;
+    function openHutangModal() {
+        const html = `
+            <div class="input-group">
+                <label class="input-label">Tempat Hutang</label>
+                <select id="inp-cat">
+                    <option value="Warung Nasi">Warung Nasi</option>
+                    <option value="Warung Biasa">Warung Biasa</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Nominal</label>
+                <input type="number" id="inp-val" placeholder="Rp 0">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="chk-unknown" style="display:none" onchange="toggleDebtInput(this)">
+                    <div class="custom-check">✔️</div>
+                    <span>Harga belum tau?</span>
+                </label>
+            </div>
+        `;
+        openModal("CATAT HUTANG", html, () => {
+            const isUnknown = document.getElementById('chk-unknown').checked;
+            const val = parseInt(document.getElementById('inp-val').value) || 0;
+            const cat = document.getElementById('inp-cat').value;
+            
+            if(val > 0 || isUnknown) {
+                dbLogs.unshift({ 
+                    id: Date.now(), tgl: getDateStr(), type: 'HUTANG', val: val, note: cat, isPending: isUnknown 
+                });
+                saveData(); showToast("Hutang tercatat");
+            }
         });
-        document.getElementById('log-list').innerHTML = html || "<div style='text-align:center; padding:60px 20px; color:var(--text-secondary); font-size:0.9rem; font-weight:500'>NO DATA LOGS</div>";
+    }
 
-        let kotor=0, kasbon=0, hutangIn=0, hutangOut=0;
-        logs.forEach(i => { if(i.type === 'KERJA') kotor += i.val; else if(i.type === 'KASBON') kasbon += i.val; else if(i.type === 'HUTANG') hutangIn += i.val; else if(i.type === 'BAYAR_HUTANG') hutangOut += i.val; });
-        const bersih = kotor - kasbon;
-        document.getElementById('txt-upah').innerText = "Rp " + kotor.toLocaleString('id-ID');
-        document.getElementById('txt-kasbon-home').innerText = "- Rp " + kasbon.toLocaleString('id-ID');
-        document.getElementById('total-bersih').innerText = "Rp " + bersih.toLocaleString('id-ID');
-        document.getElementById('txt-hutang-home').innerText = "Rp " + (hutangIn - hutangOut).toLocaleString('id-ID');
-        document.getElementById('txt-sisa-akhir').innerText = "Rp " + (bersih - (hutangIn - hutangOut)).toLocaleString('id-ID');
+    function toggleDebtInput(cb) {
+        const inp = document.getElementById('inp-val');
+        if(cb.checked) { inp.value = 0; inp.disabled = true; inp.style.background = '#eee'; } 
+        else { inp.disabled = false; inp.style.background = '#fff'; }
+    }
+
+    function openBayarModal() {
+        openModal("BAYAR HUTANG", 
+            `<div class="input-group"><label class="input-label">Jumlah Dibayar</label><input type="number" id="inp-val" placeholder="Rp 0"></div>`,
+            () => {
+                const val = parseInt(document.getElementById('inp-val').value);
+                if(val) {
+                    dbLogs.unshift({ id: Date.now(), tgl: getDateStr(), type: 'BAYAR_HUTANG', val: val, note: 'Bayar Hutang' });
+                    saveData(); showToast("Pembayaran tercatat");
+                }
+            }
+        );
+    }
+
+    // --- ACTIONS: DELETE & EDIT ---
+    function confirmDel(id) {
+        openModal("HAPUS DATA?", "Yakin ingin menghapus data ini selamanya?", () => {
+            dbLogs = dbLogs.filter(x => x.id !== id);
+            saveData(); showToast("Data dihapus");
+        });
+    }
+
+    function editItem(id) {
+        const item = dbLogs.find(x => x.id === id);
+        if(!item) return;
         
-        if(document.getElementById('total-kewajiban')) {
-             document.getElementById('total-kewajiban').innerText = "Rp " + (kasbon + (hutangIn - hutangOut)).toLocaleString('id-ID');
-             document.getElementById('txt-kasbon-loan').innerText = "Rp " + kasbon.toLocaleString('id-ID');
-             document.getElementById('txt-hutang-loan').innerText = "Rp " + (hutangIn - hutangOut).toLocaleString('id-ID');
+        let htmlVal = `<div class="input-group"><label class="input-label">Nominal</label><input type="number" id="e-val" value="${item.val}"></div>`;
+        if(item.isPending) htmlVal = `<div class="input-group"><label class="input-label">Harga Sudah Tau?</label><input type="number" id="e-val" placeholder="Masukkan harga..."></div>`;
+
+        const html = `${htmlVal}<div class="input-group"><label class="input-label">Catatan</label><input type="text" id="e-note" value="${item.note}"></div>`;
+        
+        openModal("EDIT DATA", html, () => {
+            const newVal = parseInt(document.getElementById('e-val').value) || 0;
+            item.val = newVal;
+            item.note = document.getElementById('e-note').value;
+            if(newVal > 0) item.isPending = false;
+            saveData(); showToast("Data diupdate");
+        });
+    }
+
+    // --- RENDER ENGINE ---
+    function setSort(type) { currentSort = type; renderApp(); }
+
+    function renderApp() {
+        // 1. Filter Logic
+        const fMonth = document.getElementById('filter-month').value;
+        const fType = document.getElementById('filter-type').value;
+
+        let filtered = fMonth === 'all' ? dbLogs : dbLogs.filter(l => {
+            const [d, m, y] = l.tgl.split('/'); return `${y}-${m}` === fMonth;
+        });
+
+        if(fType !== 'all') filtered = filtered.filter(l => l.type === fType);
+
+        // 2. Sort Logic
+        if(currentSort === 'new') filtered.sort((a,b) => b.id - a.id);
+        else if(currentSort === 'high') filtered.sort((a,b) => b.val - a.val);
+        else if(currentSort === 'low') filtered.sort((a,b) => a.val - b.val);
+
+        // 3. Render Dropdown Bulan (Dynamic)
+        const months = [...new Set(dbLogs.map(l => { const [d, m, y] = l.tgl.split('/'); return `${y}-${m}`; }))].sort().reverse();
+        const sel = document.getElementById('filter-month');
+        if(sel.options.length === 1 && months.length > 0) { 
+            months.forEach(m => {
+                const opt = document.createElement('option'); opt.value = m;
+                // Nama bulan bahasa indonesia
+                const dateObj = new Date(m + "-01");
+                opt.text = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
+                sel.add(opt);
+            });
         }
 
+        // 4. Render Log List HTML
+        let html = "";
+        filtered.forEach(item => {
+            let tagClass = item.type === 'KERJA' ? 'tag-kerja' : (item.type === 'KASBON' ? 'tag-kasbon' : 'tag-hutang');
+            if(item.type === 'BAYAR_HUTANG') tagClass = 'tag-kerja';
+
+            let priceDisplay = item.isPending ? `<span style="color:red; font-weight:bold; animation:blink 1s infinite">HARGA ??</span>` : `Rp ${item.val.toLocaleString('id-ID')}`;
+            
+            html += `
+            <div class="log-item" onclick="editItem(${item.id})">
+                <div style="flex:1">
+                    <div style="font-size:0.9rem; margin-bottom:4px;">
+                        <span class="tag ${tagClass}">${item.type}</span> 
+                        <span style="color:#666; font-size:0.8rem">${item.tgl}</span>
+                    </div>
+                    <div style="font-weight:700;">${item.note}</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-size:1.1rem; font-weight:700; color:${item.type==='KASBON' || item.type==='HUTANG' ? 'var(--danger)' : 'var(--success)'}">${priceDisplay}</div>
+                    <div style="color:#999; font-size:1.5rem; margin-top:5px;" onclick="confirmDel(${item.id}); event.stopPropagation()">×</div>
+                </div>
+            </div>`;
+        });
+        document.getElementById('log-list').innerHTML = html || `<div style="text-align:center; padding:30px; color:#aaa; font-style:italic;">Belum ada data...</div>`;
+
+        // 5. Calculate Totals (Global, not filtered)
+        let totalKotor = 0, totalKasbon = 0, hutangIn = 0, hutangOut = 0;
+        dbLogs.forEach(i => {
+            if(i.type === 'KERJA') totalKotor += i.val;
+            else if(i.type === 'KASBON') totalKasbon += i.val;
+            else if(i.type === 'HUTANG') hutangIn += i.val;
+            else if(i.type === 'BAYAR_HUTANG') hutangOut += i.val;
+        });
+
+        const sisaHutang = hutangIn - hutangOut;
+        const bersih = totalKotor - totalKasbon;
+        const sisaAkhir = bersih - sisaHutang;
+
+        // Update UI
+        setText('txt-upah', formatMoney(totalKotor));
+        setText('txt-kasbon-home', "- " + formatMoney(totalKasbon));
+        setText('total-bersih', formatMoney(bersih));
+        setText('txt-hutang-home', formatMoney(sisaHutang));
+        setText('txt-sisa-akhir', formatMoney(sisaAkhir));
+        
+        setText('total-kewajiban', formatMoney(totalKasbon + sisaHutang));
+        setText('txt-kasbon-loan', formatMoney(totalKasbon));
+        setText('txt-hutang-loan', formatMoney(sisaHutang));
+
+        // Status Label
         const lbl = document.getElementById('lbl-status');
-        const sisaAkhir = bersih - (hutangIn - hutangOut);
-        if(sisaAkhir < 0) { lbl.className = 'info-pill danger'; lbl.innerText = "DEFICIT"; }
-        else { lbl.className = 'info-pill safe'; lbl.innerText = "SECURE"; }
+        if(sisaAkhir < 0) { lbl.innerText = "DEFISIT"; lbl.style.background = "var(--danger)"; }
+        else { lbl.innerText = "AMAN"; lbl.style.background = "var(--success)"; }
+    }
+
+    // --- HELPERS ---
+    function saveData() { 
+        localStorage.setItem('gp_v4', JSON.stringify(dbLogs)); 
+        localStorage.setItem('gp_config', JSON.stringify(appConfig));
+        renderApp(); 
+    }
+    
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+    
+    function setText(id, val) { 
+        const el = document.getElementById(id); 
+        if(el) el.innerText = val; 
+    }
+    
+    function formatMoney(n) { return "Rp " + n.toLocaleString('id-ID'); }
+    function getDateStr() { return new Date().toLocaleDateString('id-ID'); }
+    function formatMoneySimple(num) { return "Rp " + (num ? num.toLocaleString('id-ID') : '0'); }
+    
+    function formatInputMoney(el) {
+        let val = el.value.replace(/\D/g, '');
+        if(!val) { el.value = ''; return; }
+        el.value = "Rp " + parseInt(val).toLocaleString('id-ID');
+    }
+    
+    function saveSettingsTab() {
+        const u = parseInt(document.getElementById('set-upah-tab').value.replace(/\D/g, '')) || 0;
+        const l = parseInt(document.getElementById('set-lembur-tab').value.replace(/\D/g, '')) || 0;
+        appConfig.UPAH = u; appConfig.LEMBUR = l;
+        saveData(); showToast("Pengaturan Disimpan");
+    }
+
+    // --- FILE OPS ---
+    function startExportData() {
+        const blob = new Blob([JSON.stringify({logs: dbLogs, config: appConfig})], {type:"application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); 
+        a.download = `GAJIPRO_DATA_${getDateStr().replace(/\//g,'-')}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    
+    function triggerImport() { document.getElementById('file-input').click(); }
+    
+    function importData(input) {
+        const r = new FileReader();
+        r.onload = e => {
+            try {
+                const d = JSON.parse(e.target.result);
+                if(d.logs) dbLogs = d.logs;
+                if(d.config) appConfig = d.config;
+                saveData(); showToast("Data berhasil direstore!");
+            } catch(err) { showToast("File rusak / salah format"); }
+        };
+        r.readAsText(input.files[0]);
+    }
+
+    function hardReset() {
+        openModal("RESET TOTAL", "Hapus semua data? Tidak bisa dikembalikan.", () => {
+            dbLogs = [];
+            saveData(); showToast("Semua data dihapus.");
+        });
     }
 
     async function startPDFDownload() {
-        if (!window.jspdf) return showToast("PDF LIBRARY LOADING...");
-        const d = new Date();
-        const dateStr = d.getFullYear() + "-" + (d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getDate().toString().padStart(2,'0');
-        const defaultName = "GajiPro_Report_" + dateStr + ".pdf";
-        openModal("EXPORT PDF", 
-            `<div class="input-group"><div class="input-label">FILENAME</div><input type="text" id="pdf-filename" value="${defaultName}" placeholder="Nama file..."></div>
-             <div style="font-size:0.8rem; color:var(--text-secondary); text-align:left; margin-bottom:8px;">METHOD:</div>
-             <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container); flex:1" onclick="executeSharePDF()">📤 SHARE / WA</button>
-             </div>`,
-            () => {
-                let name = document.getElementById('pdf-filename').value.trim();
-                if(!name) name = defaultName; if(!name.toLowerCase().endsWith('.pdf')) name += ".pdf";
-                generatePDF(name); 
-            }, "SAVE TO DEVICE", "btn-primary"
-        );
-    }
-
-    async function executeSharePDF() {
-        const name = document.getElementById('pdf-filename').value.trim();
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.setFillColor(103, 80, 164); doc.rect(0, 0, 210, 20, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("GAJIPRO REPORT", 14, 13);
-        const tableBody = logs.map(i => [i.tgl, i.type, i.note, "Rp " + i.val.toLocaleString('id-ID')]);
-        doc.autoTable({ startY: 30, head: [['DATE', 'TYPE', 'NOTE', 'AMOUNT']], body: tableBody, headStyles: { fillColor: [103, 80, 164] } });
-        const blob = doc.output('blob');
-        const file = new File([blob], name, { type: "application/pdf" });
-        if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GajiPro Report' }); closeModal(); } catch (e) { generatePDF(name); } } else { showToast("SHARE NOT SUPPORTED"); generatePDF(name); }
+        
+        doc.setFontSize(18); doc.text("LAPORAN GAJIPRO", 14, 20);
+        doc.setFontSize(10); doc.text("Dicetak: " + getDateStr(), 14, 26);
+        
+        const body = dbLogs.map(i => [
+            i.tgl, 
+            i.type, 
+            i.note, 
+            i.isPending ? "TBA" : "Rp " + i.val.toLocaleString('id-ID')
+        ]);
+        
+        doc.autoTable({
+            startY: 30,
+            head: [['TANGGAL', 'TIPE', 'CATATAN', 'NOMINAL']],
+            body: body,
+            theme: 'grid',
+            headStyles: { fillColor: [255, 213, 79], textColor: [0,0,0] }
+        });
+        
+        doc.save(`Laporan_GajiPro.pdf`);
     }
 
-    function generatePDF(filename) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFillColor(103, 80, 164); doc.rect(0, 0, 210, 20, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("GAJIPRO REPORT", 14, 13);
-        const tableBody = logs.map(i => [i.tgl, i.type, i.note, "Rp " + i.val.toLocaleString('id-ID')]);
-        doc.autoTable({ startY: 30, head: [['DATE', 'TYPE', 'NOTE', 'AMOUNT']], body: tableBody, headStyles: { fillColor: [103, 80, 164] } });
-        const blob = doc.output('blob');
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(() => openSuccessModal("PDF EXPORTED"), 500);
-    }
-
-    function startExportData() {
-        const d = new Date();
-        const dateStr = d.getFullYear() + "" + (d.getMonth()+1).toString().padStart(2,'0') + "" + d.getDate().toString().padStart(2,'0');
-        const defaultName = "Backup_GajiPro_" + dateStr + ".json";
-        openModal("BACKUP DATA", 
-            `<div class="input-group"><div class="input-label">BACKUP FILENAME</div><input type="text" id="json-filename" value="${defaultName}" placeholder="Nama file..."></div>
-             <button class="btn ripple-btn" style="background:var(--secondary-container); color:var(--on-secondary-container); margin-bottom:12px; width:100%" onclick="executeShareJSON()">📤 SHARE / WA</button>`, 
-            () => {
-                let name = document.getElementById('json-filename').value.trim();
-                if(!name) name = defaultName; if(!name.toLowerCase().endsWith('.json')) name += ".json";
-                executeExport(name);
-            }, "SAVE TO DEVICE", "btn-primary"
-        );
-    }
-
-    async function executeShareJSON() {
-        const name = document.getElementById('json-filename').value.trim();
-        const blob = new Blob([JSON.stringify({logs, config:CONFIG})], {type:"application/json"});
-        const file = new File([blob], name, { type: "application/json" });
-        if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Backup GajiPro' }); closeModal(); } catch (e) { executeExport(name); } } else { showToast("SHARE NOT SUPPORTED"); executeExport(name); }
-    }
-
-    function executeExport(filename) {
-        const blob = new Blob([JSON.stringify({logs, config:CONFIG})], {type:"application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(() => openSuccessModal("BACKUP SAVED"), 500);
-    }
-
-    function save() { localStorage.setItem('gp_v4', JSON.stringify(logs)); render(); }
-    function saveConfig() { localStorage.setItem('gp_config', JSON.stringify(CONFIG)); }
-    function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
-    function formatMoneySimple(num) { return "Rp " + (num ? num.toLocaleString('id-ID') : '0'); }
-    function formatInputMoney(input) { let value = input.value.replace(/\D/g, ''); if(!value) { input.value = ''; return; } input.value = "Rp " + parseInt(value).toLocaleString('id-ID'); }
-    function cleanNum(str) { return parseInt(str.replace(/\D/g, '')) || 0; }
-    function saveSettingsTab() { const u = cleanNum(document.getElementById('set-upah-tab').value); const l = cleanNum(document.getElementById('set-lembur-tab').value); if(u && l) { CONFIG.UPAH = u; CONFIG.LEMBUR = l; saveConfig(); showToast("SAVED"); render(); } }
-    function triggerImport() { document.getElementById('file-input').click(); }
-    function importData(input) { const r = new FileReader(); r.onload = e => { const d = JSON.parse(e.target.result); logs = d.logs; CONFIG = d.config; saveConfig(); save(); openSuccessModal("DATA RESTORED"); }; r.readAsText(input.files[0]); }
-    function hardReset() { openModal("⚠️ FACTORY RESET", `<div style="text-align:left;"><p style="margin-bottom:12px;">Delete ALL data permanently?</p></div>`, () => { logs=[]; save(); showToast("RESET COMPLETE"); }, "YES, WIPE ALL", "btn-danger"); }
-
-    render();
 </script>
 </body>
 </html>
